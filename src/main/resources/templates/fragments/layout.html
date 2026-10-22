@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${title} - SwitchBase|">SwitchBase</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+</head>
+<body>
+<header th:fragment="header" class="site-header">
+    <a th:href="@{/}" class="logo">SwitchBase</a>
+</header>
+<footer th:fragment="footer" class="site-footer">
+    <p>결정은 사람이, AI는 도구로.</p>
+</footer>
+</body>
+</html>

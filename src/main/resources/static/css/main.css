@@ -1,0 +1,4 @@
+body { max-width: 960px; margin: 0 auto; padding: 0 16px; font-family: system-ui, sans-serif; }
+.site-header { padding: 16px 0; border-bottom: 1px solid #ddd; }
+.logo { font-weight: 700; text-decoration: none; color: inherit; }
+.site-footer { margin-top: 48px; color: #888; font-size: 14px; }
