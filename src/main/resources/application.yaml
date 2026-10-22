@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: switchbase
+  jpa:
+    hibernate:
+      ddl-auto: validate   # 테이블은 Flyway만 만든다. JPA는 맞는지 검사만
+    open-in-view: false   # DB 연결을 화면 렌더링까지 끌고 가지 않게
+  docker:
+    compose:
+      lifecycle-management: start-only   # 앱을 꺼도 DB는 계속 켜둠 (재시작이 빨라짐)
+
+server:
+  port: 8090
