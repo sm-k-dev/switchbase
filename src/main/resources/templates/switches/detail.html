@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${sw.spec.modelName})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main th:with="s=${sw.spec}">
+    <p class="muted" th:text="${s.manufacturer}">Gateron</p>
+    <h1 th:text="${s.modelName}">Yellow</h1>
+
+    <table class="spec-table">
+        <tr><th>종류</th><td th:text="${s.switchType.label}">리니어</td></tr>
+        <tr><th>입력압</th><td th:text="${s.actuationForceG} ? |${s.actuationForceG}g| : '-'"></td></tr>
+        <tr><th>바닥압</th><td th:text="${s.bottomOutForceG} ? |${s.bottomOutForceG}g| : '-'"></td></tr>
+        <tr><th>입력 지점</th><td th:text="${s.preTravelMm} ? |${s.preTravelMm}mm| : '-'"></td></tr>
+        <tr><th>키 깊이</th><td th:text="${s.totalTravelMm} ? |${s.totalTravelMm}mm| : '-'"></td></tr>
+        <tr><th>출시</th><td th:text="${s.releaseYear} ?: '-'"></td></tr>
+    </table>
+
+    <p th:if="${s.description}" th:text="${s.description}"></p>
+
+    <h2>출처</h2>
+    <ul th:unless="${sources.empty}">
+        <li th:each="src : ${sources}">
+            <span th:text="${src.sourceType.label}">제조사 공식</span>
+            <a th:href="${src.url}" th:text="${src.url}" rel="nofollow noopener" target="_blank"></a>
+        </li>
+    </ul>
+    <p th:if="${sources.empty}" class="muted">아직 출처가 없어요.</p>
+
+    <h2>수정 이력</h2>
+    <ol class="revisions">
+        <li th:each="r : ${revisions}">
+            <strong th:text="|#${r.revisionNo}|">#1</strong>
+            <span th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+            <span th:text="${r.editor}">admin</span>
+            <span th:text="${r.editSummary}">처음 등록</span>
+        </li>
+    </ol>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
