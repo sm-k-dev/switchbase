@@ -8,6 +8,11 @@ spring:
   docker:
     compose:
       lifecycle-management: start-only   # 앱을 꺼도 DB는 계속 켜둠 (재시작이 빨라짐)
+  security:
+    user:
+      name: ${ADMIN_USERNAME:admin}
+      password: ${ADMIN_PASSWORD:admin1234}
+      roles: ADMIN
 
 server:
   port: 8090
