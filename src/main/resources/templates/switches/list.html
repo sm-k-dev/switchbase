@@ -5,7 +5,20 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
     <h1>스위치</h1>
-
+    <!-- 입력이 바뀔 때마다 htmx가 GET /switches 를 보내고, #results 안만 갈아 끼운다 -->
+    <form class="filters" th:action="@{/switches}" method="get"
+          hx-get="/switches" hx-target="#results" hx-swap="outerHTML" hx-push-url="true"
+          hx-trigger="input changed delay:300ms, change">
+        <input type="search" name="keyword" th:value="${search.keyword}" placeholder="제조사나 이름">
+        <select name="type">
+            <option value="">모든 종류</option>
+            <option th:each="t : ${types}" th:value="${t}" th:text="${t.label}"
+                    th:selected="${t == search.type}"></option>
+        </select>
+        <input type="number" name="minForce" th:value="${search.minForce}" placeholder="최소 g" step="1">
+        <input type="number" name="maxForce" th:value="${search.maxForce}" placeholder="최대 g" step="1">
+        <noscript><button type="submit">검색</button></noscript>
+    </form>
     <section id="results" th:fragment="results">
         <p class="muted" th:text="|${page.totalElements}개|">0개</p>
         <table class="switch-table" th:unless="${page.empty}">
@@ -22,12 +35,16 @@
             </tr>
             </tbody>
         </table>
-        <p th:if="${page.empty}">아직 스위치가 없어요.</p>
+        <p th:if="${page.empty}">조건에 맞는 스위치가 없어요.</p>
 
         <nav class="pager" th:if="${page.totalPages > 1}">
-            <a th:if="${page.hasPrevious()}" th:href="@{/switches(page=${page.number - 1})}">이전</a>
+            <a th:if="${page.hasPrevious()}"
+               th:href="@{/switches(keyword=${search.keyword}, type=${search.type}, minForce=${search.minForce}, maxForce=${search.maxForce}, page=${page.number - 1})}"
+               hx-boost="true" hx-target="#results" hx-select="#results" hx-swap="outerHTML">이전</a>
             <span th:text="|${page.number + 1} / ${page.totalPages}|">1 / 3</span>
-            <a th:if="${page.hasNext()}" th:href="@{/switches(page=${page.number + 1})}">다음</a>
+            <a th:if="${page.hasNext()}"
+               th:href="@{/switches(keyword=${search.keyword}, type=${search.type}, minForce=${search.minForce}, maxForce=${search.maxForce}, page=${page.number + 1})}"
+               hx-boost="true" hx-target="#results" hx-select="#results" hx-swap="outerHTML">다음</a>
         </nav>
     </section>
 </main>

@@ -15,17 +15,20 @@ public class SwitchService {
     private final KeyboardSwitchRepository switches;
     private final SwitchRevisionRepository revisions;
     private final SpecSourceRepository sources;
+    private final SwitchQueryRepository switchQuery;
 
     public SwitchService (KeyboardSwitchRepository switches,
                           SwitchRevisionRepository revisions,
-                          SpecSourceRepository sources) {
+                          SpecSourceRepository sources,
+                          SwitchQueryRepository switchQuery) {
         this.switches = switches;
         this.revisions = revisions;
         this.sources = sources;
+        this.switchQuery = switchQuery;
     }
 
-    public Page<KeyboardSwitch> list(Pageable pageable) {
-        return switches.findAll(pageable);
+    public Page<KeyboardSwitch> search(SwitchSearch search, Pageable pageable) {
+        return switchQuery.search(search, pageable);
     }
 
     public KeyboardSwitch get(Long id) {
