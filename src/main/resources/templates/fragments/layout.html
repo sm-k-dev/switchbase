@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +12,13 @@
     <a th:href="@{/}" class="logo">SwitchBase</a>
     <nav>
         <a th:href="@{/switches}">스위치</a>
+        <th:block sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/switches/new}">새 스위치</a>
+            <a th:href="@{/admin/switches/import}">CSV</a>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <button type="submit">로그아웃</button>
+            </form>
+        </th:block>
     </nav>
 </header>
 <footer th:fragment="footer" class="site-footer">

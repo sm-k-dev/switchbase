@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head(${sw.spec.modelName})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main th:with="s=${sw.spec}">
     <p class="muted" th:text="${s.manufacturer}">Gateron</p>
     <h1 th:text="${s.modelName}">Yellow</h1>
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/switches/{id}/edit(id=${sw.id})}">수정</a>
 
     <table class="spec-table">
         <tr><th>종류</th><td th:text="${s.switchType.label}">리니어</td></tr>
