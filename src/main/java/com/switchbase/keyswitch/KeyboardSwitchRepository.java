@@ -4,5 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface KeyboardSwitchRepository extends JpaRepository<KeyboardSwitch, Long> {
 
-    boolean existsBySpecManufacturerAndSpecModelName(String manufacturer, String modelName);
+    boolean existsBySpecManufacturerAndSpecModelNameAndSpecVariant(String manufacturer, String modelName, String variant);
+
+    boolean existsBySpecManufacturerAndSpecModelNameAndSpecVariantIsNull(String manufacturer, String modelName);
+
 }

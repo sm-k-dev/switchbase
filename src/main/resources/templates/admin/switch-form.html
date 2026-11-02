@@ -14,8 +14,14 @@
         <label>제조사 <input th:field="*{manufacturer}" required></label>
         <p class="error" th:errors="*{manufacturer}"></p>
 
-        <label>이름 <input th:field="*{modelName}" required></label>
+        <label>브랜드 (콜라보일 때만) <input th:field="*{brand}" placeholder="기획/판매한 쪽"></label>
+        <p class="error" th:errors="*{brand}"></p>
+
+        <label>이름 (제조사 공식 표기) <input th:field="*{modelName}" required></label>
         <p class="error" th:errors="*{modelName}"></p>
+
+        <label>변형 (같은 이름에 무게만 다를 때) <input th:field="*{variant}" placeholder="예: 45g"></label>
+        <p class="error" th:errors="*{variant}"></p>
 
         <label>종류
             <select th:field="*{switchType}" required>
@@ -35,6 +41,9 @@
         <p class="error" th:errors="*{totalTravelMm}"></p>
         <label>출시 연도 <input type="number" th:field="*{releaseYear}"></label>
         <p class="error" th:errors="*{releaseYear}"></p>
+
+        <label>다른 이름 (한 줄에 하나) <textarea th:field="*{aliases}" rows="3" placeholder="저월백&#10;저소음 월백"></textarea></label>
+        <p class="error" th:errors="*{aliases}"></p>
 
         <label>설명 <textarea th:field="*{description}" rows="4"></textarea></label>
 

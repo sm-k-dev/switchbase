@@ -40,6 +40,7 @@ public class SwitchController {
         model.addAttribute("sw", switchService.get(id));
         model.addAttribute("sources", switchService.sourcesOf(id));
         model.addAttribute("revisions", switchService.revisionsOf(id));
+        model.addAttribute("aliases", switchService.aliasesOf(id));
 
         return "switches/detail";
     }

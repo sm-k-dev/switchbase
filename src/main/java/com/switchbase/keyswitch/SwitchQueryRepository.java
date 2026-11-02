@@ -1,6 +1,9 @@
 package com.switchbase.keyswitch;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,7 +14,10 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static com.switchbase.keyswitch.QManufacturerAlias.manufacturerAlias;
+import static com.switchbase.keyswitch.QSwitchAlias.switchAlias;
 import static com.switchbase.keyswitch.QKeyboardSwitch.keyboardSwitch;
+
 
 @Repository
 public class SwitchQueryRepository {
@@ -33,7 +39,8 @@ public class SwitchQueryRepository {
         List<KeyboardSwitch> content = query
                 .selectFrom(keyboardSwitch)
                 .where(conditions)
-                .orderBy(keyboardSwitch.spec.manufacturer.asc(), keyboardSwitch.spec.modelName.asc())
+                .orderBy(keyboardSwitch.spec.manufacturer.asc(), keyboardSwitch.spec.modelName.asc(),
+                        keyboardSwitch.spec.variant.asc().nullsFirst())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -47,13 +54,28 @@ public class SwitchQueryRepository {
         return new PageImpl<>(content, pageable, total == null ? 0 : total);
     }
 
-    // 조건이 비어 있으면 null을 돌려준다. QueryDSL은 where 안의 null을 무시한다.
+    // 제조사, 브랜드, 이름, 별칭, 제조사의 다른 표기 중 하나라도 맞으면 찾는다.
+    // 이름과 별칭은 띄어쓰기와 대소문자를 무시하고 비교한다.
     private BooleanExpression keywordContains(String keyword) {
         if (!StringUtils.hasText(keyword)) {
             return null;
         }
-        return keyboardSwitch.spec.manufacturer.containsIgnoreCase(keyword)
-                .or(keyboardSwitch.spec.modelName.containsIgnoreCase(keyword));
+        String compact = Names.normalize(keyword);
+        StringExpression compactModelName = Expressions.stringTemplate(
+                "replace(lower({0}), ' ', '')", keyboardSwitch.spec.modelName);
+
+        return keyboardSwitch.spec.manufacturer.containsIgnoreCase(keyword.strip())
+                .or(keyboardSwitch.spec.brand.containsIgnoreCase(keyword.strip()))
+                .or(compactModelName.contains(compact))
+                .or(JPAExpressions.selectOne()
+                        .from(switchAlias)
+                        .where(switchAlias.keyboardSwitch.eq(keyboardSwitch),
+                                switchAlias.normalized.contains(compact))
+                        .exists())
+                .or(keyboardSwitch.spec.manufacturer.in(
+                        JPAExpressions.select(manufacturerAlias.manufacturer)
+                                .from(manufacturerAlias)
+                                .where(manufacturerAlias.normalized.contains(compact))));
     }
 
     private BooleanExpression typeEq(SwitchType type) {

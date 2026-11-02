@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('CSV 등록')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>CSV로 스위치 등록</h1>
+
+    <div th:if="${result}" class="result">
+        <p th:text="|새로 등록 ${result.created}개, 이미 있어서 건너뜀 ${result.skipped}개|"></p>
+        <ul th:unless="${result.errors.empty}">
+            <li class="error" th:each="e : ${result.errors}" th:text="${e}"></li>
+        </ul>
+    </div>
+
+    <form th:action="@{/admin/switches/import}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">올리기</button>
+    </form>
+    <p class="muted">첫 줄은 제목 줄이고, UTF-8로 저장한 파일이어야 해요.</p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

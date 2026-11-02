@@ -5,11 +5,12 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main>
     <h1>스위치</h1>
+
     <!-- 입력이 바뀔 때마다 htmx가 GET /switches 를 보내고, #results 안만 갈아 끼운다 -->
     <form class="filters" th:action="@{/switches}" method="get"
           hx-get="/switches" hx-target="#results" hx-swap="outerHTML" hx-push-url="true"
           hx-trigger="input changed delay:300ms, change">
-        <input type="search" name="keyword" th:value="${search.keyword}" placeholder="제조사나 이름">
+        <input type="search" name="keyword" th:value="${search.keyword}" placeholder="제조사, 이름, 별명">
         <select name="type">
             <option value="">모든 종류</option>
             <option th:each="t : ${types}" th:value="${t}" th:text="${t.label}"
@@ -19,6 +20,7 @@
         <input type="number" name="maxForce" th:value="${search.maxForce}" placeholder="최대 g" step="1">
         <noscript><button type="submit">검색</button></noscript>
     </form>
+
     <section id="results" th:fragment="results">
         <p class="muted" th:text="|${page.totalElements}개|">0개</p>
         <table class="switch-table" th:unless="${page.empty}">
@@ -27,8 +29,8 @@
             </thead>
             <tbody>
             <tr th:each="sw : ${page.content}" th:with="s=${sw.spec}">
-                <td th:text="${s.manufacturer}">Gateron</td>
-                <td><a th:href="@{/switches/{id}(id=${sw.id})}" th:text="${s.modelName}">Yellow</a></td>
+                <td th:text="${s.brand} ? |${s.manufacturer} × ${s.brand}| : ${s.manufacturer}">Gateron</td>
+                <td><a th:href="@{/switches/{id}(id=${sw.id})}" th:text="${s.variant} ? |${s.modelName} (${s.variant})| : ${s.modelName}">Yellow</a></td>
                 <td th:text="${s.switchType.label}">리니어</td>
                 <td th:text="${s.actuationForceG} ? |${s.actuationForceG}g| : '-'">50g</td>
                 <td th:text="${s.totalTravelMm} ? |${s.totalTravelMm}mm| : '-'">4.0mm</td>

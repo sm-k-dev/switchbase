@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/layout :: head(${sw.spec.modelName})}"></head>
+<head th:replace="~{fragments/layout :: head(${sw.spec.variant} ? |${sw.spec.modelName} (${sw.spec.variant})| : ${sw.spec.modelName})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 <main th:with="s=${sw.spec}">
     <p class="muted" th:text="${s.manufacturer}">Gateron</p>
-    <h1 th:text="${s.modelName}">Yellow</h1>
+    <h1 th:text="${s.variant} ? |${s.modelName} (${s.variant})| : ${s.modelName}">Yellow</h1>
+    <p class="muted" th:unless="${aliases.empty}"
+       th:text="|다른 이름: ${#strings.listJoin(aliases.![alias], ', ')}|">다른 이름: 저월백</p>
     <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/switches/{id}/edit(id=${sw.id})}">수정</a>
 
     <table class="spec-table">
+        <tr th:if="${s.brand}"><th>브랜드</th><td th:text="${s.brand}"></td></tr>
         <tr><th>종류</th><td th:text="${s.switchType.label}">리니어</td></tr>
         <tr><th>입력압</th><td th:text="${s.actuationForceG} ? |${s.actuationForceG}g| : '-'"></td></tr>
         <tr><th>바닥압</th><td th:text="${s.bottomOutForceG} ? |${s.bottomOutForceG}g| : '-'"></td></tr>
