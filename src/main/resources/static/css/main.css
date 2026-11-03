@@ -14,3 +14,5 @@ body { max-width: 960px; margin: 0 auto; padding: 0 16px; font-family: system-ui
 .pager { display: flex; gap: 16px; justify-content: center; margin: 16px 0; }
 .switch-form { display: grid; gap: 8px; max-width: 480px; }
 .switch-form label { display: grid; gap: 4px; }
+.notice { color: #1e7e34; margin: 0; }
+.me { color: #555; }
