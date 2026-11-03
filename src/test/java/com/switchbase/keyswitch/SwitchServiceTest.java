@@ -51,7 +51,9 @@ class SwitchServiceTest {
         assertThat(revisions).extracting(SwitchRevision::getRevisionNo).containsExactly(2, 1);
         assertThat(revisions.get(1).getSpec().actuationForceG()).isEqualByComparingTo("50");
         assertThat(switchService.get(sw.getId()).getSpec().actuationForceG()).isEqualByComparingTo("55");
-        assertThat(switchService.sourcesOf(sw.getId())).hasSize(1);
+        assertThat(switchService.sourcesOf(sw.getId()))
+                .extracting(SpecSource::getSourceType)
+                .containsExactly(SourceType.COMMUNITY);
     }
 
     @Test

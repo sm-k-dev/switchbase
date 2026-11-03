@@ -115,9 +115,11 @@ public class SwitchService {
         }
     }
 
+    // 처음 들어오는 출처는 공식이라고 장담할 수 없어서 커뮤니티로 둔다.
+    // 나중에 유저가 공식 자료로 확인하면 OFFICIAL로 바꾼다.
     private void addSource(KeyboardSwitch target, String sourceUrl) {
         if (StringUtils.hasText(sourceUrl)) {
-            sources.save(new SpecSource(target, SourceType.OFFICIAL, sourceUrl.strip(), null));
+            sources.save(new SpecSource(target, SourceType.COMMUNITY, sourceUrl.strip(), null));
         }
     }
 }
