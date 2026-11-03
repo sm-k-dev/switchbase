@@ -1,0 +1,250 @@
+manufacturer,brand,model_name,variant,switch_type,actuation_force_g,bottom_out_force_g,pre_travel_mm,total_travel_mm,release_year,aliases,source_url
+ABKO,,베이비 화이트 축,,LINEAR,,,,,,,
+ABKO,,베이비 블루 축,,TACTILE,,,,,,,
+Akko,,V3 크림 옐로우 프로,,LINEAR,50,55,2,3.3,,V3 Cream Yellow Pro,https://kbd.news/switch/akko-cream-yellow-pro-v3-switch-5.html
+Akko,,V3 크림 블루 프로,,TACTILE,45,,2.2,3.3,,V3 Cream Blue Pro,https://akkogear.eu/products/v3-cream-blue-pro-switch-45pcs
+Akko,,V3 크림 블랙 프로,,LINEAR,,,,,,,https://www.newegg.com/akko-v3-cream-black-pro-mechanical-linear/p/32N-04U2-00337
+Akko,,실버 프로,,LINEAR,40,50,1,3.3,,,https://kbd.news/switch/akko-silver-pro-v3-switch-89.html
+Akko,,크리스탈 프로,,LINEAR,,,,,,,https://milktooth.com/comparisons/crystal-pro-vs-piano-pro
+Akko,,V3 맛차 그린 프로,,LINEAR,,,,,,,https://milktooth.com/comparisons/cream-blue-pro-vs-matcha-green-pro
+Akko,,V3 피아노 프로,,LINEAR,45,50,1.9,3.1,,V3 Piano Pro|V3 piano,https://kbd.news/switch/akko-piano-pro-switch-11.html
+Akko,,piano cs,,LINEAR,,,,,,,https://www.pichau.com.br/switch-para-teclado-akko-mecanico-linear-45-pecas-cs-piano-akko-switch-cs-pi
+Akko,,페어리,,LINEAR,50,55,2,3.3,,,https://kbd.news/switch/akko-fairy-switch-8.html
+Akko,,펭귄,,TACTILE,48,65,2,3.3,,,https://kbd.news/switch/akko-penguin-silent-switch-7.html
+Akko,,로즈우드,,LINEAR,40,50,2,4,,,https://kbd.news/switch/akko-rosewood-switch-12.html
+Huano,AULA,카라멜라떼,,LINEAR,,,,,,카라멜라떼축|Caramel Latte,https://unikeyboards.com/en-au/products/huano-caramel-latte-linear-switch-factory-lubed-10pcs
+Leobog,AULA,청우축,,LINEAR,45,55,,3.6,,Rain Listening|Listen to the rain|청우,https://blog.naver.com/300nam/224084396710
+BSUN,Keynetix,캔디 바닐라,,LINEAR,47,52,,3.4,,,https://dpg.danawa.com/bbs/view?boardSeq=264&listSeq=5529630&past=Y
+BSUN,Keynetix,쿠키 앤 크림,,LINEAR,,60,,3.6,,아이스 쿠키앤크림,https://j-la.co.kr/product/mongddang키네틱스-x-bsun-아이스-쿠키앤크림-리니어-스위치팩-35ea/24/
+BSUN,Keynetix,민트 초코,,LINEAR,,,,,,아이스 민트초코,https://j-la.co.kr/product/키네틱스-x-bsun-아이스-민트초코-리니어-스위치팩-35ea/11/
+HMX,Keynetix,캔디 레드,,LINEAR,,52,,3.5,,,https://j-la.co.kr/product/키네틱스-x-hmx-캔디레드-리니어-스위치팩-35ea/14/
+BSUN,,RAW,리니어,LINEAR,,60,2,3.4,,,https://keebsforall.com/products/bsun-raw-linear-switches-1
+BSUN,,RAW,넌클릭,TACTILE,,60,2,3.4,,,https://keebsforall.com/products/bsun-raw-tactile-switches
+BSUN,,톰캣,,LINEAR,,,,,,,https://milktooth.com/products/tomcat
+BSUN,,딸기와인,,LINEAR,,,,,,,https://keebsforall.com/products/sarokeys-strawberry-wine-linear-switches
+BSUN,,롤리팝,,LINEAR,,,,,,,https://reach.dog/shop/pompokey/products/akko-piano-v3-pro-linear-switch
+Everglide,,Sunset Yellow,,LINEAR,,,,,,,https://milktooth.com/comparisons/sunset-yellow-vs-tuzi
+BSUN,Sarokeys,딸기 밀크 쉐이크 S,,LINEAR,,,,,,Strawberry Milkshake S,https://divinikey.com/products/sarokeys-strawberry-milkshake-s-linear-switches
+BSUN,,Black Cherry Pie,,LINEAR,,,,,,BCP,https://keebsforall.com/products/sarokeys-bsun-bcp-linear-switches
+BSUN,,Holly Pandas,,TACTILE,,,,,,,https://kbd.news/switch/BSUN-Holy-Panda-V2-243.html
+BSUN,SPM,몽돌 블랙,,LINEAR,,45,,,,Mongdol|Mongdol Black|몽돌,
+BSUN,Keebz N Cables,Taro N Sweet Potato,,LINEAR,,,,,,Taro|타로,https://keebzncables.com/products/bsun-taro-n-sweet-potato-linear-switches
+Cherry,,적축,MX2A,LINEAR,45,,2,4,,,https://cdn.sparkfun.com/assets/a/9/b/6/2/MX2A_RED-Datasheet-EN_US.pdf
+Cherry,,저소음 적축,MX2A,LINEAR,45,65,1.9,3.7,,,https://kbd.news/switch/Cherry-MX2A-Silent-Red-switch-111.html
+Cherry,,흑축,MX1A,LINEAR,,,,,,삼신흑,https://kbd.news/switch/Cherry-MX1A-Hyperglide-Black-switch-452.html
+Cherry,,흑축,MX2A,LINEAR,60,90,2,4,,사신흑,https://kbd.news/switch/Cherry-MX2A-Black-switch-123.html
+Cherry,,회축,리니어,LINEAR,,,,,,,
+Cherry,,회축,넌클릭,TACTILE,,,,,,,
+Cherry,,백축,,TACTILE,55,90,,,,클리어축|MX Clear,
+Cherry,,갈축,MX2A,TACTILE,45,,2,4,,,https://cdn.sparkfun.com/assets/6/b/7/9/b/MX2A_BROWN-Datasheet-EN_US.pdf
+Cherry,,밀크,,CLICKY,70,,,,,밀크축|MX White,
+Cherry,,녹축,,CLICKY,,,,,,,
+Cherry,,청축,MX2A,CLICKY,50,60,2.2,4,,,https://kbd.news/switch/Cherry-MX2A-Blue-switch-110.html
+CIDOO,ABKO,딥사운드 저소음,,LINEAR,45,,,,,딥사운드 무소음,
+CIDOO,,코튼 저소음,,LINEAR,,,,,,,
+C³Equalz,,바나나 스플릿,,LINEAR,,,,,,,https://computerorbit.com/products/c-equalz-banana-split-linear-switch
+DAREU,,저소음 베이지 축,,TACTILE,,,,,,,
+DAREU,,저소음 오크 축,,TACTILE,,,,,,,
+DAREU,,저소음 머스타드 축,,LINEAR,,,,,,,
+DAREU,,스노우 축,,LINEAR,,,,,,,
+DAREU,,스카이 POM,,LINEAR,,,,,,,
+DAREU,,바이올렛 POM,,TACTILE,,,,,,,
+DAREU,,클라우드 축,,LINEAR,42,,2,3.4,,,
+Durock,,Anubis,,TACTILE,,65,,4,,,https://cannonkeys.com/products/anubis-switch
+Durock,,Cherry Blossom,,LINEAR,,65,,,,,
+Durock,,쉬림프 저소음,,TACTILE,40,67,2,4,,,https://kbd.news/switch/Durock-Silent-T1-Shrimp-switch-213.html
+Durock,,돌핀 저소음,,LINEAR,,,,,,,
+Durock,,Pom Piano,,LINEAR,55,63.5,2,3.7,,,https://milktooth.com/comparisons/anubis-vs-piano
+Epomaker,,플라밍고,,LINEAR,,,,,,,https://epomaker.com/products/epomaker-flamingo-switch-set
+Epomaker,,크리미 제이드,,LINEAR,,,,,,,https://epomaker.com/pages/switch-library
+Epomaker,,지브라,,LINEAR,,,,,,,https://epomaker.com/pages/switch-library
+Epomaker,,위스테리아,,LINEAR,,,,,,,
+Everglide,,Dark Jade Black,,TACTILE,,,,,,다크 제이드 블랙,https://www.thockking.com/collections/vendors/products/everglide-dark-jade-black-switches
+Everglide,,Aqua King,,LINEAR,,,,,,아쿠아 킹,https://milktooth.com/brands/everglide
+Everglide,,Wild Pansy,,TACTILE,,,,,,와일드 팬지,https://comparigon.com/keyboard-switches/everglide-wild-pansy-v2
+Everglide,,Oreo,,TACTILE,,,,,,오레오,https://milktooth.com/products/switches/oreo
+FADOG,,PURFLE,,LINEAR,,,,,,Aronia|아로니아|절절자|벅지축,
+Feker,,아쿠아 황축,,LINEAR,,,,,,,
+Feker,,말차 프로,,TACTILE,,,,,,,
+Feker,,마블 화이트,,LINEAR,,,,,,,https://www.whatgeek.com/products/feker-marble-white-linear-switches
+FL-ESPORTS,,저소음 스노우,,LINEAR,40,,,,,,
+Gateron,,저소음 백축,,LINEAR,,,,,,,https://studioctrl.ch/en/gateron/871-gateron-silent-switch-set-110pcsset-white.html
+Gateron,,저소음 갈축,,TACTILE,,,,,,,https://studioctrl.ch/en/gateron/869-gateron-silent-switch-set-110pcsset-brown.html
+Gateron,,황축 프로,3.0,LINEAR,50,67,2,4,,,https://kbd.news/switch/gateron-g-pro-3.0-yellow-switch-59.html
+Gateron,,황축 프로,2.0,LINEAR,50,67,2,4,,,https://www.gateron.com/pages/g-pro-20
+Gateron,,잉크 블랙 V2,,LINEAR,,,,,,,https://keeb-finder.com/switches/gateron-ink-black-v2-60g-linear-pcb
+Gateron,,갈축,,TACTILE,,,,,,,https://milktooth.com/comparisons/g-pro-3-brown-vs-g-pro-3-white
+Gateron,,백축,,LINEAR,,,,,,,https://milktooth.com/comparisons/g-pro-3-brown-vs-g-pro-3-white
+Gateron,,오일 킹,,LINEAR,55,,2,4,,,https://kbd.news/switch/gateron-oil-king-switch-13.html
+Gateron,,Baby Kangaroo,,TACTILE,,,,,,,https://milktooth.com/comparisons/baby-kangaroo-vs-luciola
+Gateron,,Quinn,,TACTILE,50,67,2,3.4,,,https://kbd.news/switch/gateron-quinn-switch-30.html
+Gateron,,Absolute Zero,,LINEAR,,,,,,앱제,
+Gateron,,Everfree curry,,LINEAR,,,,,,,https://milktooth.com/products/switches/everfree-curry
+Gateron,,Milky Yellow Pro,,LINEAR,50,62,2,4,,,https://kbd.news/switch/gateron-milky-yellow-pro-switch-23.html
+Gateron,,Smoothie,,LINEAR,40,,2,3.6,,,https://kbd.news/switch/gateron-smoothie-switch-60.html
+Gateron,,Luciola,,LINEAR,,,,,,,https://milktooth.com/comparisons/baby-kangaroo-vs-luciola
+Gateron,,Mars,,LINEAR,,,,,,,https://milktooth.com/products/switches/mars
+Gateron,,루나 프로브,,LINEAR,45,,1.8,3.6,,Lunar Probe|루나,
+Gazzew,,Boba Gum,,LINEAR,,,,,,,https://milktooth.com/comparisons/bobagum-vs-u4
+Gazzew,,Boba U4,,TACTILE,45,62,,3.6,,U4,https://kbd.news/switch/GAZZEW-Boba-U4-switch-103.html
+Gazzew,,Boba U4T,,TACTILE,,65,,,,U4T,https://kbd.news/switch/GAZZEW-U4T-switch-106.html
+Geon,,블랙 리니어,,LINEAR,,,,,,,
+Gateron,GravaStar,별빛 먹축,,LINEAR,40,,,,,,https://yoolmom.tistory.com/14
+GravaStar,,별빛 현축,,LINEAR,45,,1.2,3.5,,Speedy Mint,https://blog.naver.com/auvergne_crona/223912894697
+HMX,Geon,HG White,,TACTILE,,,,,,,https://keebsforall.com/products/haimu-x-geon-hg-white-tactile-switches
+HMX,Geon,HG 저소음 옐로우,,TACTILE,,,,,,,https://divinikey.com/products/haimu-x-geon-hg-yellow-silent-tactile-switches
+HMX,,바이올렛,,LINEAR,45,,2,3.5,,,https://kbd.news/switch/HMX-Violet-switch-182.html
+HMX,,Canglan,V2,LINEAR,42,48,2,3.5,,파도|창란축,https://thoccexchange.com/products/hmx-canglan-v2-linear-switch-10-pack
+HMX,,치즈,,LINEAR,,,,,,,https://keeb-finder.com/switches/hmx-cheese-43g-linear-pcb-mount-switch
+HMX,,신하이,,LINEAR,37,45,2,3.4,,,https://kbd.news/switch/hmx-xinhai-switch-2.html
+HMX,,페블,,LINEAR,,,,,,,https://lumekeebs.com/collections/hmx-switches?page=2
+HMX,,은행나무,,LINEAR,45,55,2,3.7,,Ginkgo,https://unikeyboards.com/en-gb/products/hmx-ginkgo-linear-switch-factory-lubed-10pcs
+HMX,,목세 저소음,리니어,LINEAR,45,53,2,3.8,,Moksae Silent Linear|목세,https://kbd.news/switch/HMX-Moksae-switch-384.html
+HMX,,목세 저소음,넌클릭,TACTILE,45,53,2,3.7,,Moksae Silent Tactile,https://unikeyboards.com/products/hmx-moksae-silent-tactile-switch-factory-lubed-10pcs
+HMX,,요거트,,LINEAR,45,52,2,3.4,,,https://kbd.news/switch/HMX-Yogurt-V1-switch-201.html
+HMX,,NAP,,LINEAR,,,,,,냅,https://lumekeebs.com/collections/hmx-switches?page=2
+HMX,,젤리,,LINEAR,,,,,,,https://keeb-finder.com/switches/hmx-jelly-switch
+HMX,,히비스커스,,LINEAR,42,48,2,3.5,,Hibiscus,https://unikeyboards.com/products/hmx-hibiscus-linear-switch-factory-lubed-10pcs
+HMX,,밀키 화이트,,LINEAR,,,,,,,https://milktooth.com/products/milky-white
+HMX,,Jammy,,LINEAR,,,,,,,https://milktooth.com/products/jammy
+HMX,,Cloud,,LINEAR,,,,,,,https://mechanicalkeyboards.com/collections/hmx-switches
+HMX,,Poro,,LINEAR,,,,,,,https://mechanicalkeyboards.com/collections/hmx-switches
+HMX,,Canglan,V3,LINEAR,42,50,2,3.8,,파도|창란축,https://mechanicalkeyboards.com/products/hmx-canglan-v3-42g-linear-pcb-mount-switch
+HMX,,Bluetopaz,,LINEAR,,,,,,,https://keeb-finder.com/switches/hmx-blue-topaz-linear-switches
+HMX,Geon,랩터,,LINEAR,45,52,0.9,3,,Raptor|Raptor MX,
+HMX,,윈드라이트,,LINEAR,,,,,,Wind Light,
+HMX,,레몬 그레이프,,LINEAR,45,,,,,Lemon Grape|Citrus Grape,
+HMX,,Lotus,,LINEAR,,,,,,,https://keeb-finder.com/switches/hmx-lotus-linear-switch-10-pack
+HMX,,라벤더,,LINEAR,,,,,,,
+HMX,,RAW,,LINEAR,,,,,,,https://divinikey.com/products/haimu-raw-linear-switches
+HMX,,미드나잇,,LINEAR,,,,,,,https://www.keychron.com/collections/haimu-switches/products/haimu-midnight-linear-switch
+HMX,,바다소금,리니어,LINEAR,47,55,2,3.6,,,https://www.keychron.com/products/haimu-sea-salt-linear-switch
+HMX,,바다소금,넌클릭,TACTILE,,,2,3.5,,,https://rndkbd.com/products/haimu-seasalt
+HMX,,바다소금 저소음,,LINEAR,50,,,,,,https://rndkbd.com/products/haimu-seasalt
+HMX,,바다살구,,LINEAR,37,45,,,,Sea Apricot,
+HMX,,바다파도,,TACTILE,,,,,,,
+HMX,,펄레몬,,LINEAR,45,45,2,3.5,,Pearl Lemon,
+HMX,,저소음 딥블루,,LINEAR,,,,,,,https://ko.aliexpress.com/s/wiki-ssr/article/하이무-저소음
+HMX,,위스퍼,,TACTILE,,,,,,Whisper,
+HMX,,하데스 V2,,LINEAR,,,,,,,https://keeb-finder.com/switches/hades-v2-switch
+Huano,,Matcha Latte V2,,LINEAR,,,,,,,https://milktooth.com/comparisons/matcha-latte-v2-vs-white-lotus
+Huano,,Blossom Odyssey,,LINEAR,40,,,,,화심축|화심|벚꽃축,
+Huano,AULA,Wind Spirit,,LINEAR,45,50,,,,풍령축|Wind Bell,https://lbtest.tistory.com/2000
+Invokeys,,Purple Rice,,LINEAR,,,,,,퍼플 라이스,https://keebzncables.com/products/invokeys-purple-rice-linear-switches-switches
+Invyr,,Holy Panda,,TACTILE,,,,,,,https://kbd.news/switch/Invyr-Holy-Panda-462.html
+JWK,,말차,,LINEAR,,,,,,,
+JWK,,빙옥,,TACTILE,,,,,,,
+JWK,,Snow Ink,,LINEAR,,,,,,설묵축,
+JWK,,Vertex V1,,LINEAR,50,62,,4,,,https://lumekeebs.com/products/vertex-v1-linear-switches
+Kailh,,딥씨 저소음 프로,아일랜드,LINEAR,45,,1.8,3.6,,Lonely Island|Islet|론리 아일랜드,https://www.keychron.com/products/kailh-deep-sea-silent-pro-box-switch
+Kailh,,딥씨 저소음 프로,웨일,TACTILE,,60,2,3.6,,저소음 고래|심해 고래|Whale,https://kbd.news/switch/Kailh-Deep-Sea-Silent-Pro-Box-Whale-switch-199.html
+Kailh,,저소음 크림,,LINEAR,45,,,,,Box Silent Cream,
+Kailh,,홀리판다,,TACTILE,,,,,,,https://kbd.news/switch/Invyr-Holy-Panda-462.html
+Kailh,,오로라 아이스크림,,LINEAR,40,,,3.5,,VGN 오로라 아이스크림,https://kbd.news/switch/Kailh-BOX-Aurora-Ice-Cream-161.html
+Kailh,,미드나잇 프로 저소음,리니어,LINEAR,45,,1.9,4,,,https://www.keychron.com/products/kailh-midnight-pro-silent-switch
+Kailh,,미드나잇 프로 저소음,넌클릭,TACTILE,45,,1.9,3.7,,,https://www.keychron.com/products/kailh-midnight-pro-silent-switch
+Kailh,,박스 핑크 저소음,,LINEAR,,,,,,,https://keeb-finder.com/switches/kailh-box-silent-pink-switch
+Kailh,,박스 봄,,CLICKY,,,,,,,
+Kailh,,박스 여름,,LINEAR,,,,,,,
+Kailh,,박스 가을,,CLICKY,,,,,,,
+Kailh,,박스 겨울,,TACTILE,,,,,,,
+Kailh,,박스 제이드,,CLICKY,50,60,1.8,3.6,,,https://kbd.news/switch/Kailh-Box-Jade-switch-365.html
+Keychron,,주피터 바나나축,,TACTILE,59,69,2,3.4,,,https://kbd.news/switch/Gateron-Jupiter-Banana-switch-107.html
+Keychron,,저소음 적축,,LINEAR,,,,,,,https://www.keychron.com/collections/keychron-mechanical-keyboard-switches/products/keychron-silent-k-pro-switch
+Keychron,,저소음 갈축,,TACTILE,,,,,,,https://www.keychron.com/collections/keychron-mechanical-keyboard-switches/products/keychron-silent-k-pro-switch
+Keychron,,저소음 바나나축,,TACTILE,,,,,,,https://keychron.ca/products/keychron-silent-switch
+Keychron,,저소음 백축,,LINEAR,,,,,,,https://keychron.com/collections/keychron-mechanical-keyboard-switches/products/keychron-silent-k-pro-switch
+Keygeek,,오트,,LINEAR,,,,,,,https://divinikey.com/products/keygeek-oat-linear-switches
+Keygeek,,토리,,LINEAR,,,,,,,https://acceptance.reach.dog/shop/swagkeys/products/keygeek-tori-switch
+Keygeek,,Briny,,LINEAR,,,,,,창해,https://unikeyboards.com/products/keygeek-briny-linear-switch-factory-lubed-edition-10pcs
+Keygeek,,맛차 푸딩,,LINEAR,,,,,,,https://lumekeebs.com/collections/linear-switches/products/keygeek-matcha-pudding-linear-switches
+Keygeek,MZ Studio,Y3,,LINEAR,48,53,2,3.8,,MZ Y3,https://kbd.news/switch/KEYGEEK-X-MZ-Y3-75.html
+BSUN,KeysU,Bunny,,LINEAR,37,42,,3.6,,Tuzi|버니,
+Kiiboom,,말차라떼,,LINEAR,,,,,,,https://www.kiiboom.com/collections/switches/products/kiiboom-matcha-latte-switches
+Kiiboom,,자카란다,,LINEAR,,,,,,,https://www.kiiboom.com/products/kiiboom-jacaranda-switches
+Kiiboom,,사파이어,,LINEAR,,,,,,,https://www.kiiboom.com/products/kiiboom-sapphire-switches
+KNC Keys,,Green Jacket,,LINEAR,,,,,,그린 자켓,https://www.maxgaming.com/en/switches/green-jacket-linear-switch
+HMX,,Neo White,,LINEAR,,,,,,Haimu Neo White,https://keebsforall.com/products/neo-white-linear-switches
+KTT,,블루치즈,,LINEAR,,,,,,,https://unikeyboards.com/products/ktt-bluecheese-switch-slightly-factory-lubed-10pcs
+KTT,,Mist Blue,,LINEAR,43,,1.9,4,,미스트 블루|미스트블루|안개블루,
+KTT,,Silent Ocean,,LINEAR,43,,,,,저소음 바다축,
+KTT,,저소음 파도축,,LINEAR,43,55,,,,,
+KTT,,로즈,,LINEAR,,,,,,,https://kbd.news/switch/KTT-Rose-86.html
+KTT,,Strawberry,,LINEAR,,,,,,,https://keebsforall.com/products/ktt-strawberry-linear-switches
+KTT,,Matcha,,TACTILE,,,,,,,https://milktooth.com/comparisons/matcha-vs-pine
+KTT,,Kang White,,LINEAR,,,,,,,https://divinikey.com/products/ktt-kang-white-linear-switches
+KTT,,베이비 화이트,,LINEAR,,,,,,,https://mechanicalkeyboards.com/products/ktt-baby-white-43g-linear-pcb-mount-switch
+Leobog,,황축 V3,,LINEAR,,,,,,Yellow V3|Nimbus,https://www.whatgeek.com/products/leobog-nimbus-v3-linear-switch
+Leobog,,Seiya,,LINEAR,,,,,,세이야축,https://vishalperipherals.com/collections/aula/products/aula-leobog-star-vector-seiya-linear-switch-ultra-smooth-pre-lubed-hot-swappable-for-custom-keyboards-100pcs-ss100
+MMD,,홀리판다,,TACTILE,,,,,,,https://thoccexchange.com/products/mmd-holy-panda-tactile-10-per-pack
+MMD,,Coral,38g,TACTILE,38,,,,,,
+MMD,,Coral,45g,TACTILE,45,,,,,,
+Monstargear,,후르츠 리치,,LINEAR,,,,,,,
+Monstargear,,후르츠 피치 저소음,,LINEAR,,,,,,,
+Monstargear,,후르츠 망고,,TACTILE,,,,,,,
+Monstargear,,동백 저소음,,LINEAR,39,,,,,,
+Monstargear,,목란,,LINEAR,,,,,,,
+Groove Stone,,저소음 밀키 축,38g,LINEAR,38,,,,,,
+Groove Stone,,저소음 밀키 축,45g,LINEAR,45,,,,,,
+Groove Stone,,저소음 하늬 축,,LINEAR,,,,,,,
+Groove Stone,,저소음 너울 축,,TACTILE,,,,,,,
+Groove Stone,,저소음 코랄축,38g,TACTILE,38,,,,,,
+Groove Stone,,저소음 코랄축,45g,TACTILE,45,,,,,,
+Groove Stone,,저소음 갈축,38g,TACTILE,38,,,,,그저갈,
+Groove Stone,,저소음 갈축,45g,TACTILE,45,,,,,그저갈,
+MZ Studio,,Z1,,LINEAR,,,,,,,
+NovelKeys,,크림,55g,LINEAR,55,70,,,,Cream|크림L,
+NovelKeys,,크림,45g,LINEAR,45,,,,,Cream|크림L,
+NuPhy,,레몬,,TACTILE,,,,,,,https://nuphy.com/products/nuphy-lemon-switches
+NuPhy,,민트,,LINEAR,,,,,,,https://keeb-finder.com/switches/compare/nuphy-mint-switches-vs-nuphy-raspberry-switches
+NuPhy,,라즈베리,,LINEAR,,,,,,,https://keeb-finder.com/switches/compare/nuphy-mint-switches-vs-nuphy-raspberry-switches
+Outemu,,저소음 피치 V3,,LINEAR,40,50,2,3.3,,,https://kbd.news/switch/Outemu-Silent-Honey-Peach-V3-switch-134.html
+Outemu,,저소음 라임 V3,,TACTILE,35,50,1.8,3.3,,,https://kbd.news/switch/Outemu-Silent-Lemon-Lime-V3-switch-191.html
+Outemu,,저소음 바다,,LINEAR,45,,,,,Silent Ocean|바다,
+Outemu,,저소음 백축,,LINEAR,,,,,,,https://milktooth.com/comparisons/outemu-silent-white-vs-outemu-tom
+Outemu,,저소음 크림옐로우 프로,,TACTILE,50,60,2,3.3,,,https://kbd.news/switch/Outemu-Cream-Yellow-Pro-Silent-Tactile-Switches-switch-173.html
+Outemu,,톰,,TACTILE,,,,,,,https://milktooth.com/comparisons/outemu-silent-white-vs-outemu-tom
+Outemu,,톰 저소음,,TACTILE,,,,,,,https://ubbthreads.com/store/item/Lubed-Tom-50g-Silent-Tactile-Outemu-Switches-for-Custom-Keyboard-Building_185866934535.html
+Owlab,,런던포그,,LINEAR,,,,,,,https://divinikey.com/products/owlab-london-fog-linear-switches
+Monstargear,,아델리,V2,LINEAR,45,63,2,3.7,,Adelie,
+QSENN,,퍼플축,,TACTILE,,,,,,,
+Qwertykeys,,qk01,,LINEAR,,,,,,,https://unikeyboards.com/products/duhuk-qk01-linear-switch-factory-lubed-edition-10pcs
+Rubrehose,,Gray Linear,,LINEAR,,,,,,,
+Sarokeys,,Hourglass,,LINEAR,,,,,,모래시계,
+BSUN,SPM,몽돌 화이트,,LINEAR,,45,,,,Mongdol White|화이트 몽돌축,
+SWK,Leobog,Sea Whale,,LINEAR,46,60,1.8,3.5,,경해축|Sae Whale,https://m.blog.naver.com/gsamo/223750371931
+SWK,,모카축,,LINEAR,,,,,,,https://www.keebzncables.com/collections/all/products/swk-mocha-st-linear-switches-1
+SWK,,지음 V2,,LINEAR,,,,,,Jieum V2,https://divinikey.com/collections/frontpage/products/swk-jieum-v2-linear-switches
+Tecsee,,ZAKU,,LINEAR,,,,,,,https://kbd.news/switch/Tecsee-Zaku-21.html
+Tecsee,,Bocchi,,LINEAR,,,,,,,https://keeb-finder.com/switches/compare/g-square-alice-linear-switch-10pcs-vs-tecsee-bocchi-linear-switch-10pcs
+THINKWAY,,저소음 피치소다,,LINEAR,53,65,2,3.8,,Peach Soda,
+TTC,,플레임 오렌지,,LINEAR,,,,,,,https://mechkeys.com/blogs/news/ttc-introduces-all-new-flaming-orange-pom-material-switches
+TTC,,Silent Bluish White,,TACTILE,42,50,2,3.5,,저소음 월백|저월백,https://kbd.news/switch/ttc-silent-bluish-white-v2-switch-47.html
+TTC,SW,Peanut Latte,,TACTILE,42,,,3.5,,저월백2,https://www.antipode.studio/products/sw-x-ttc-peanut-latte-silent-tactile
+TTC,,비너스,,LINEAR,,,,,,,https://kbd.news/switch/TTC-Venus-switch-1.html
+TTC,,타이거,,LINEAR,,,,,,,https://sp-siliconpower.com/products/ttc-tiger-rgb-switches
+TTC,,거인의 심장,,LINEAR,42,,1.2,3.6,,Titan Heart|타이탄 하트,
+TTC,,Crescent,,LINEAR,42,,,3.6,,신월축|초승달축,
+TTC,,Silent Prozen,,LINEAR,39,43,2,3.5,,,https://kbd.news/switch/ttc-silent-frozen-v2-switch-48.html
+TTC,,Silent Red,,LINEAR,,,,,,,https://milktooth.com/comparisons/silent-brown-vs-silent-red
+TTC,,Silent Brown,,TACTILE,,,,,,,https://milktooth.com/comparisons/silent-brown-vs-silent-red
+TTC,,Light Cloud V2,,LINEAR,,,,,,,https://milktooth.com/comparisons/light-cloud-v2-vs-neptune
+TTC,,Neptune,,LINEAR,,,,,,,https://milktooth.com/comparisons/light-cloud-v2-vs-neptune
+TYPONE,,저소음 코튼,,LINEAR,,,,,,,
+Varmilo,,데이지축,,LINEAR,,,,,,,https://varmilo.com/pages/switches-parameter
+Varmilo,,로즈축,,LINEAR,,,,,,,https://varmilo.com/pages/switches-parameter
+Varmilo,,Daisy L,,LINEAR,,,,,,,https://varmilo.com/pages/switches-parameter
+Wuque Studio,,오로라 핑크,,LINEAR,,,,,,,https://stackskb.com/?p=10786
+Wuque Studio,,오로라 포그,,LINEAR,,,,,,,https://stackskb.com/?p=10786
+Wuque Studio,,오로라 클리어,,LINEAR,,,,,,,https://keebsforall.com/products/wuque-ws-aurora-clear-linear-switches
+Wuque Studio,,Morandi,,LINEAR,,,,,,,https://kineticlabs.com/blog/an-overview-of-wuque-studio-switches
+Wuque Studio,,MM,,LINEAR,,,,,,,https://keeb-finder.com/switches/wuque-mm-linear-switches-bottom-housing
+XVX,,ICE,,LINEAR,,,,,,,
+YUNZII,,Cocoa Crea,,LINEAR,,,,,,,https://reach.dog/shop/yunzii-keyboard/products/yunzii-cocoa-cream-5-pin-early-bottoming-mechanical-keyboard-linear-switch
+YUNZII,,Milk,,LINEAR,,,,,,,https://reach.dog/shop/yunzii-keyboard/products/yunzii-mlik-3-pin-mechanical-keyboard-linear-switch
+YUNZII,,Caramel Coffee,,LINEAR,,,,,,,https://reach.dog/shop/yunzii-keyboard/products/yunzii-caramel-coffee-5-pin-mute-silent-linear-mechanical-keyboard-switch
+Zeal,,Zealios,,TACTILE,,,,,,,
+Zeal,,Tealios,,LINEAR,,,,,,,
+Zeal,,Healios,,LINEAR,,,,,,,https://divinikey.com/products/zeal-healios-v2-silent-linear-switches
+Zeal,,Sakulios,,LINEAR,,,,,,,https://divinikey.com/products/zeal-sakurios-silent-linear-switches
+Zeal,,Zilents,,TACTILE,,,,,,,
