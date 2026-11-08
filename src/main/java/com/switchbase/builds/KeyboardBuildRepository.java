@@ -34,8 +34,12 @@ public interface KeyboardBuildRepository extends JpaRepository<KeyboardBuild, Lo
     /** 숨김 빌드도 포함해서 센다(Q3). */
     long countByMemberId(Long memberId);
 
-    @Query(value = "select b from KeyboardBuild b join fetch b.member where b.hidden = false "
+    /** 숨김 제외. 탈퇴 회원의 빌드는 보관 기간(cutoff 이후 탈퇴)까지만 보인다. */
+    @Query(value = "select b from KeyboardBuild b join fetch b.member m where b.hidden = false "
+            + "and b.deletedAt is null and (m.deletedAt is null or m.deletedAt > :cutoff) "
             + "order by b.createdAt desc, b.id desc",
-            countQuery = "select count(b) from KeyboardBuild b where b.hidden = false")
-    Page<KeyboardBuild> findVisible(Pageable pageable);
+            countQuery = "select count(b) from KeyboardBuild b join b.member m where b.hidden = false "
+            + "and b.deletedAt is null and (m.deletedAt is null or m.deletedAt > :cutoff)")
+    Page<KeyboardBuild> findVisible(@org.springframework.data.repository.query.Param("cutoff") java.time.Instant cutoff,
+                                    Pageable pageable);
 }

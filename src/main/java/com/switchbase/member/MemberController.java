@@ -47,6 +47,9 @@ public class MemberController {
         } catch (DuplicateMemberException e) {
             binding.rejectValue(e.getField(), "duplicate", e.getMessage());
             return "member/signup";
+        } catch (SignupBlockedException e) {
+            binding.rejectValue("email", "blocked", e.getMessage());
+            return "member/signup";
         }
         model.addAttribute("email", Member.normalizeEmail(form.getEmail()));
         return "member/signup-done";

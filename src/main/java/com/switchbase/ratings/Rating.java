@@ -50,6 +50,14 @@ public class Rating {
     @Column(name = "lubed")
     private Boolean lubed;
 
+    /** 신고 처리로 숨김. 작성자만 보고, 집계에서 빠진다(Q14). */
+    @Column(name = "hidden", nullable = false)
+    private boolean hidden;
+
+    /** 소프트 딜리트. 집계와 목록에서 빠진다. 보관 30일 뒤 완전 삭제(§6-4). */
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @ManyToMany
     @JoinTable(name = "rating_mod_tag",
             joinColumns = @JoinColumn(name = "rating_id"),
@@ -88,6 +96,21 @@ public class Rating {
         this.updatedAt = Instant.now();
     }
 
+    /** 작성자 본인이 삭제하거나 관리자가 삭제한다. 행은 남기고 deleted_at을 찍는다. */
+    void softDelete(Instant now) {
+        this.deletedAt = now;
+        this.updatedAt = now;
+    }
+
+    /** 신고 처리(숨김)와 작성자의 숨김 해제에만 쓴다. */
+    void changeHidden(boolean hidden) {
+        this.hidden = hidden;
+        this.updatedAt = Instant.now();
+    }
+
+    public boolean isHidden() { return hidden; }
+    public boolean isDeleted() { return deletedAt != null; }
+    public Instant getDeletedAt() { return deletedAt; }
     public Long getId() { return id; }
     public KeyboardSwitch getKeyboardSwitch() { return keyboardSwitch; }
     public Member getMember() { return member; }

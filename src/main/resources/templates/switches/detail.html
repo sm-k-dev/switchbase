@@ -11,6 +11,10 @@
     <p th:if="${message}" class="notice" th:text="${message}"></p>
     <a sec:authorize="isAuthenticated()" th:href="@{/switches/{id}/edit(id=${sw.id})}">수정</a>
 
+    <th:block th:with="switchId=${sw.id}">
+        <th:block th:replace="~{collections/toggles :: toggles}"></th:block>
+    </th:block>
+
     <table class="spec-table">
         <tr th:if="${s.brand}"><th>브랜드</th><td th:text="${s.brand}"></td></tr>
         <tr><th>종류</th><td th:text="${s.switchType.label}">리니어</td></tr>
@@ -44,6 +48,10 @@
 
     <th:block th:with="switchId=${sw.id}">
         <th:block th:replace="~{ratings/section :: section}"></th:block>
+    </th:block>
+
+    <th:block th:with="switchId=${sw.id}">
+        <th:block th:replace="~{reviews/section :: section}"></th:block>
     </th:block>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

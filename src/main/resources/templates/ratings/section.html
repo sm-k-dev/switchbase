@@ -39,6 +39,11 @@
             <span class="muted" th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</span>
             <!-- 수정은 작성자(mine), 삭제는 작성자 또는 관리자(deletable). 권한 판단은 서버가 계산한다 -->
             <a th:if="${r.mine}" th:href="@{/ratings/{id}/edit(id=${r.id})}">수정</a>
+            <!-- 숨김 평가는 작성자 본인 목록에만 나온다. 해제도 작성자만 -->
+            <span th:if="${r.mine and r.hidden}" class="error">숨김 처리된 평가입니다</span>
+            <form th:if="${r.mine and r.hidden}" th:action="@{/ratings/{id}/unhide(id=${r.id})}" method="post" class="inline">
+                <button type="submit">숨김 해제</button>
+            </form>
             <form th:if="${r.deletable}" th:action="@{/ratings/{id}/delete(id=${r.id})}" method="post" class="inline"
                   onsubmit="return confirm('이 평가를 삭제할까요? 되돌릴 수 없어요.');">
                 <button type="submit">삭제</button>

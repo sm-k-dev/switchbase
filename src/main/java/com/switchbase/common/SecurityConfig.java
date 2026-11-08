@@ -21,14 +21,23 @@ class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
                                             MemberUserDetailsService userDetailsService,
-                                            PasswordEncoder passwordEncoder) throws Exception {
+                                            PasswordEncoder passwordEncoder,
+                                            com.switchbase.member.MemberRepository members) throws Exception {
         http
+                .addFilterBefore(new com.switchbase.member.MemberStatusFilter(members),
+                        org.springframework.security.web.access.intercept.AuthorizationFilter.class)
                 .authenticationProvider(memberAuthenticationProvider(userDetailsService, passwordEncoder))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // 위키: 수정·되돌리기는 로그인 회원만. 상세·이력·비교·최근 변경은 누구나 본다 (wiki-design §5.6)
                         .requestMatchers(HttpMethod.GET, "/switches/*/edit", "/switches/*/revisions/*/revert").authenticated()
                         .requestMatchers(HttpMethod.POST, "/switches/*", "/switches/*/revisions/*/revert").authenticated()
+                        // 후기·컬렉션·신고·탈퇴 (review-collection-report §5, review-screens §2)
+                        .requestMatchers("/me/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/switches/*/reviews/new", "/reviews/*/edit", "/reports/new").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/switches/*/reviews", "/reviews/*", "/reviews/*/delete",
+                                "/reviews/*/helpful", "/reviews/*/unhide", "/ratings/*/unhide",
+                                "/switches/*/collection/*", "/reports").authenticated()
                         // 체감 평가: 상세의 목록·요약은 누구나, 등록·수정·삭제·자동완성은 로그인 회원 (rating-design §4)
                         .requestMatchers(HttpMethod.GET, "/switches/*/ratings/new", "/ratings/*/edit", "/mod-tags/suggest").authenticated()
                         .requestMatchers(HttpMethod.POST, "/switches/*/ratings", "/ratings/*", "/ratings/*/delete").authenticated()

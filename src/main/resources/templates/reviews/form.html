@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${reviewId} ? '후기 수정' : '후기 쓰기')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1 th:text="${reviewId} ? '후기 수정' : '후기 쓰기'">후기 쓰기</h1>
+
+    <form th:object="${form}" method="post" class="switch-form"
+          th:action="${reviewId} ? @{/reviews/{id}(id=${reviewId})} : @{/switches/{id}/reviews(id=${switchId})}">
+        <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+        <input type="hidden" th:field="*{version}">
+
+        <fieldset>
+            <legend>추천 대상 (여러 개 고를 수 있어요)</legend>
+            <label th:each="o : ${recommendOptions}">
+                <input type="checkbox" th:field="*{recommendedFor}" th:value="${o.code}">
+                <span th:text="${o.label}">입문자</span>
+            </label>
+        </fieldset>
+        <p class="error" th:errors="*{recommendedFor}"></p>
+
+        <label>후기 (2000자 이내)
+            <textarea th:field="*{body}" rows="8" maxlength="2000" required></textarea>
+        </label>
+        <p class="error" th:errors="*{body}"></p>
+
+        <button type="submit">저장</button>
+    </form>
+    <p><a th:href="${switchId} ? @{/switches/{id}(id=${switchId})} : @{/switches}">취소하고 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

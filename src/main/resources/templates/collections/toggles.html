@@ -1,0 +1,20 @@
+<!-- 스위치 상세의 컬렉션 토글 3개(즐겨찾기·보유·써봤음). switches/detail.html에서 include한다.
+     사용: <th:block th:replace="~{collections/toggles :: toggles}"></th:block>
+     모델: switchId, collection(CollectionState: favorite, owned, tried). 비로그인이면 collection이 null이다. -->
+<th:block th:fragment="toggles" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="collection-toggles" th:if="${collection != null}">
+        <!-- 각 상태는 독립 토글. 누르면 켜지고 다시 누르면 꺼진다 -->
+        <form th:action="@{/switches/{id}/collection/FAVORITE(id=${switchId})}" method="post" class="inline">
+            <button type="submit" th:text="${collection.favorite} ? '즐겨찾기 해제' : '즐겨찾기'">즐겨찾기</button>
+        </form>
+        <form th:action="@{/switches/{id}/collection/OWNED(id=${switchId})}" method="post" class="inline">
+            <button type="submit" th:text="${collection.owned} ? '보유 해제' : '보유'">보유</button>
+        </form>
+        <form th:action="@{/switches/{id}/collection/TRIED(id=${switchId})}" method="post" class="inline">
+            <button type="submit" th:text="${collection.tried} ? '써봤음 해제' : '써봤음'">써봤음</button>
+        </form>
+    </div>
+    <p sec:authorize="isAnonymous()" class="muted">
+        <a th:href="@{/login}">로그인</a>하면 즐겨찾기·보유·써봤음을 표시할 수 있어요.
+    </p>
+</th:block>

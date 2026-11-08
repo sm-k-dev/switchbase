@@ -16,6 +16,13 @@ public interface SwitchRevisionRepository extends JpaRepository<SwitchRevision, 
 
     int countByKeyboardSwitchId(Long switchId);
 
+    /** 탈퇴 시 편집자 이름만 바꾼다. 편집자 회원 id는 남긴다(편집 기록 유지, Q19). */
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query(
+            "update SwitchRevision r set r.editor = :name where r.editorMemberId = :mid")
+    int renameEditor(@org.springframework.data.repository.query.Param("mid") Long memberId,
+                     @org.springframework.data.repository.query.Param("name") String name);
+
     /** 최근 변경 목록. 스위치를 함께 가져와 목록에서 N+1이 생기지 않게 한다. */
     @Query(value = "select r from SwitchRevision r join fetch r.keyboardSwitch order by r.createdAt desc, r.id desc",
             countQuery = "select count(r) from SwitchRevision r")

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('신고하기')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>신고하기</h1>
+    <p class="muted" th:text="|신고 대상: ${targetLabel}|">신고 대상: 후기</p>
+
+    <form th:object="${form}" method="post" class="switch-form" th:action="@{/reports}">
+        <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+        <input type="hidden" th:field="*{targetType}">
+        <input type="hidden" th:field="*{targetId}">
+
+        <label>사유
+            <select th:field="*{reasonCode}" required>
+                <option value="">고르세요</option>
+                <option th:each="o : ${reasonOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{reasonCode}"></p>
+
+        <label>메모 (선택, 500자 이내)
+            <textarea th:field="*{detail}" rows="4" maxlength="500"></textarea>
+        </label>
+        <p class="error" th:errors="*{detail}"></p>
+
+        <p class="muted">신고를 보내면 관리자가 확인해요. 신고만으로는 바로 숨겨지지 않아요.</p>
+        <button type="submit">신고 보내기</button>
+    </form>
+    <p><a th:href="@{/switches}">취소하고 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,6 +1,8 @@
 package com.switchbase.ratings;
 
+import com.switchbase.common.Retention;
 import com.switchbase.keyswitch.KeyboardSwitchRepository;
+import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public class RatingStatsService {
         stats.ensureRow(switchId);
         SwitchRatingStats row = stats.findForUpdate(switchId)
                 .orElseThrow(() -> new IllegalStateException("집계 행이 없습니다: " + switchId));
-        row.replace(ratings.summaryOf(switchId));
+        row.replace(ratings.summaryOf(switchId, Retention.cutoff(Instant.now())));
     }
 
     /** 관리용 전체 재계산. 모든 스위치를 같은 트랜잭션에서 다시 계산한다(멱등). 처리한 스위치 수를 돌려준다. */

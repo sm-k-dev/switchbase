@@ -1,6 +1,7 @@
 package com.switchbase.ratings;
 
 import com.switchbase.builds.BuildView;
+import com.switchbase.common.Retention;
 import com.switchbase.builds.KeyboardBuild;
 import com.switchbase.builds.KeyboardBuildRepository;
 import com.switchbase.builds.Option;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -65,7 +67,9 @@ public class RatingService {
 
     public Page<RatingView> list(Long switchId, Long viewerId, boolean viewerAdmin, Pageable pageable) {
         requireSwitch(switchId);
-        return ratings.findBySwitch(switchId, pageable).map(r -> view(r, viewerId, viewerAdmin));
+        Long viewer = viewerId == null ? -1L : viewerId;
+        return ratings.findBySwitch(switchId, viewer, Retention.cutoff(Instant.now()), pageable)
+                .map(r -> view(r, viewerId, viewerAdmin));
     }
 
     /** 수정 화면용. 작성자가 아니면 403이다(rating-screens §1, 평가는 공개 데이터). */
@@ -116,7 +120,8 @@ public class RatingService {
         Member member = members.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 없습니다: " + memberId));
         KeyboardBuild build = ownedBuild(in.buildId(), memberId);
-        if (ratings.findByKeyboardSwitchIdAndMemberIdAndBuildId(switchId, memberId, buildIdOf(build)).isPresent()) {
+        if (ratings.findFirstByKeyboardSwitchIdAndMemberIdAndBuildIdAndDeletedAtIsNull(
+                switchId, memberId, buildIdOf(build)).isPresent()) {
             throw new RatingDuplicateException();
         }
         Rating saved = saveRating(new Rating(sw, member, build, in, resolveTags(in.tags())));
@@ -136,7 +141,7 @@ public class RatingService {
         Long newBuildId = buildIdOf(build);
         Long oldBuildId = r.getBuild() == null ? null : r.getBuild().getId();
         if (!Objects.equals(newBuildId, oldBuildId)) {
-            var other = ratings.findByKeyboardSwitchIdAndMemberIdAndBuildId(
+            var other = ratings.findFirstByKeyboardSwitchIdAndMemberIdAndBuildIdAndDeletedAtIsNull(
                     r.getKeyboardSwitch().getId(), viewerId, newBuildId);
             if (other.isPresent() && !other.get().getId().equals(r.getId())) {
                 throw new RatingDuplicateException();
@@ -156,7 +161,7 @@ public class RatingService {
             throw new RatingAccessDeniedException("작성자나 관리자만 삭제할 수 있어요");
         }
         Long switchId = r.getKeyboardSwitch().getId();
-        ratings.delete(r);
+        r.softDelete(Instant.now());
         ratings.flush();
         stats.recompute(switchId);
         return switchId;
@@ -166,7 +171,36 @@ public class RatingService {
 
     private Rating load(Long ratingId) {
         return ratings.findById(ratingId)
+                .filter(r -> !r.isDeleted())
                 .orElseThrow(() -> new NoSuchElementException("평가가 없습니다: " + ratingId));
+    }
+
+    /**
+     * 숨김 해제. 작성자만 가능하고, 그 외(관리자 포함)에게는 404다(사용자 확정).
+     * 숨기지 않은 평가에 대한 요청은 상태를 바꾸지 않는다.
+     */
+    @Transactional
+    public Long unhide(Long ratingId, Long viewerId) {
+        Rating r = load(ratingId);
+        if (!isAuthor(r, viewerId)) {
+            throw new NoSuchElementException("평가가 없습니다: " + ratingId);
+        }
+        Long switchId = r.getKeyboardSwitch().getId();
+        if (r.isHidden()) {
+            r.changeHidden(false);
+            ratings.flush();
+            stats.recompute(switchId);
+        }
+        return switchId;
+    }
+
+    /** 신고 처리 결과로 숨김(관리자 전용 경로에서만 호출). 집계에서 빠진다(Q14). */
+    @Transactional
+    public void hideByReport(Long ratingId) {
+        Rating r = load(ratingId);
+        r.changeHidden(true);
+        ratings.flush();
+        stats.recompute(r.getKeyboardSwitch().getId());
     }
 
     private void requireSwitch(Long switchId) {
@@ -194,7 +228,8 @@ public class RatingService {
                 r.getBuild() != null,
                 r.getCreatedAt(),
                 mine,
-                mine || viewerAdmin);
+                mine || viewerAdmin,
+                mine && r.isHidden());
     }
 
     private static String lubedLabel(Boolean lubed) {

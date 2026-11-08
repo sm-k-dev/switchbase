@@ -13,10 +13,11 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", nullable = false, length = 255)
+    /** 탈퇴 시 NULL로 익명화된다(review-collection-report Q19). */
+    @Column(name = "email", length = 255)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 100)
+    @Column(name = "password_hash", length = 100)
     private String passwordHash;
 
     @Column(name = "nickname", nullable = false, length = 20)
@@ -31,6 +32,12 @@ public class Member {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @Column(name = "collection_public", nullable = false)
+    private boolean collectionPublic;
 
     protected Member() {}
 
@@ -50,6 +57,30 @@ public class Member {
 
     public void verifyEmail() {
         this.emailVerified = true;
+    }
+
+    /**
+     * 탈퇴 익명화: 이메일·비밀번호 해시를 지우고 닉네임을 유일한 "탈퇴회원<id>"로 바꾼다.
+     * 행 자체는 남긴다(편집 기록과 평가의 작성자 참조를 유지하려고).
+     */
+    public void withdraw(Instant now) {
+        this.email = null;
+        this.passwordHash = null;
+        this.nickname = "탈퇴회원" + this.id;
+        this.collectionPublic = false;
+        this.deletedAt = now;
+    }
+
+    public boolean isWithdrawn() {
+        return deletedAt != null;
+    }
+
+    public Instant getDeletedAt() { return deletedAt; }
+
+    public boolean isCollectionPublic() { return collectionPublic; }
+
+    public void changeCollectionPublic(boolean collectionPublic) {
+        this.collectionPublic = collectionPublic;
     }
 
     public Long getId() { return id; }

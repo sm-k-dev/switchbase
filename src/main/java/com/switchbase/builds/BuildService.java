@@ -28,7 +28,7 @@ public class BuildService {
     }
 
     public Page<KeyboardBuild> visibleBuilds(Pageable pageable) {
-        return builds.findVisible(pageable);
+        return builds.findVisible(com.switchbase.common.Retention.cutoff(java.time.Instant.now()), pageable);
     }
 
     /** 숨김 빌드는 작성자 외에게 없는 것처럼 404다. 상세·수정 화면이 같은 규칙을 쓴다. */

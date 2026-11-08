@@ -9,6 +9,10 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
 
     Optional<EmailVerificationToken> findByTokenHash(String tokenHash);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("delete from EmailVerificationToken t where t.member.id = :mid")
+    int deleteByMember(@org.springframework.data.repository.query.Param("mid") Long memberId);
+
     /** 회원의 아직 쓰지 않았고 만료되지 않은 토큰 수 (재발송 상한 검사용, 사전 리뷰 R1). */
     long countByMemberIdAndUsedAtIsNullAndExpiresAtAfter(Long memberId, Instant now);
 }

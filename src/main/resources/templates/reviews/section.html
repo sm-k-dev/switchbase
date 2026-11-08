@@ -1,0 +1,66 @@
+<!-- 스위치 상세의 후기 목록. switches/detail.html에서 include한다.
+     사용: <th:block th:replace="~{reviews/section :: section}"></th:block>
+     모델: switchId, sort("recent"|"helpful"), reviewPage(Page<ReviewView>) -->
+<th:block th:fragment="section" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <h2>후기</h2>
+
+    <p>
+        <a sec:authorize="isAuthenticated()" th:href="@{/switches/{id}/reviews/new(id=${switchId})}">후기 쓰기</a>
+    </p>
+    <p class="muted">
+        정렬:
+        <a th:if="${sort == 'helpful'}" th:href="@{/switches/{id}(id=${switchId}, sort='recent')}">최신순</a>
+        <strong th:unless="${sort == 'helpful'}">최신순</strong>
+        ·
+        <a th:if="${sort != 'helpful'}" th:href="@{/switches/{id}(id=${switchId}, sort='helpful')}">도움됨순</a>
+        <strong th:unless="${sort != 'helpful'}">도움됨순</strong>
+    </p>
+
+    <p class="muted" th:if="${reviewPage.empty}">아직 후기가 없어요.</p>
+
+    <ul class="reviews" th:unless="${reviewPage.empty}">
+        <li th:each="r : ${reviewPage.content}">
+            <strong th:text="${r.authorNickname}">닉네임</strong>
+            <span class="muted" th:unless="${r.recommendedLabels.empty}"
+                  th:text="|추천 대상: ${#strings.listJoin(r.recommendedLabels, ', ')}|">추천 대상: 입문자</span>
+            <span class="muted" th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</span>
+
+            <p th:text="${r.body}">본문</p>
+
+            <!-- 숨김 상태는 작성자에게만 도달한다(숨김 후기는 작성자 외 조회 불가) -->
+            <p class="error" th:if="${r.hidden}">숨김 상태예요. 작성자에게만 보여요.</p>
+
+            <span th:text="|도움됨 ${r.helpfulCount}|">도움됨 0</span>
+
+            <!-- 도움됨: 로그인 회원, 본인 후기 제외(canVote). 토글 -->
+            <form th:if="${r.canVote}" th:action="@{/reviews/{id}/helpful(id=${r.id})}" method="post" class="inline">
+                <button type="submit" th:text="${r.helpfulByMe} ? '도움됨 취소' : '도움됨'">도움됨</button>
+            </form>
+
+            <!-- 수정은 작성자(mine), 삭제는 작성자 또는 관리자(deletable). 서버가 계산한다 -->
+            <a th:if="${r.mine}" th:href="@{/reviews/{id}/edit(id=${r.id})}">수정</a>
+            <form th:if="${r.deletable}" th:action="@{/reviews/{id}/delete(id=${r.id})}" method="post" class="inline"
+                  onsubmit="return confirm('이 후기를 삭제할까요? 되돌릴 수 없어요.');">
+                <button type="submit">삭제</button>
+            </form>
+
+            <!-- 숨김 해제는 작성자만(관리자 포함 다른 회원에게는 버튼 없음) -->
+            <form th:if="${r.mine and r.hidden}" th:action="@{/reviews/{id}/unhide(id=${r.id})}" method="post" class="inline">
+                <button type="submit">숨김 해제</button>
+            </form>
+
+            <!-- 신고: 로그인 회원, 본인 글 제외 -->
+            <th:block th:unless="${r.mine}">
+                <th:block th:replace="~{reports/button :: button('REVIEW', ${r.id})}"></th:block>
+            </th:block>
+        </li>
+    </ul>
+
+    <nav class="pager" th:if="${reviewPage.totalPages > 1}">
+        <a th:if="${reviewPage.hasPrevious()}"
+           th:href="@{/switches/{id}(id=${switchId}, sort=${sort}, reviewPage=${reviewPage.number - 1})}">이전</a>
+        <span th:text="|${reviewPage.number + 1} / ${reviewPage.totalPages}|">1 / 3</span>
+        <a th:if="${reviewPage.hasNext()}"
+           th:href="@{/switches/{id}(id=${switchId}, sort=${sort}, reviewPage=${reviewPage.number + 1})}">다음</a>
+    </nav>
+</th:block>

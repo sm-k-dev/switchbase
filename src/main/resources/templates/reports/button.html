@@ -1,0 +1,7 @@
+<!-- 신고 버튼 조각. 호출하는 곳이 본인 대상을 걸러서 넘긴다(본인 대상 신고 불가).
+     사용: <th:block th:replace="~{reports/button :: button('REVIEW', ${r.id})}"></th:block>
+     targetType: REVIEW | RATING | BUILD -->
+<span th:fragment="button(targetType, targetId)" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <a sec:authorize="isAuthenticated()"
+       th:href="@{/reports/new(targetType=${targetType}, targetId=${targetId})}">신고</a>
+</span>

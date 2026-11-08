@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('신고 관리')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>신고 관리</h1>
+    <p th:if="${message}" class="notice" th:text="${message}"></p>
+
+    <!-- 상태 필터 -->
+    <nav class="tabs">
+        <a th:href="@{/admin/reports(status='RECEIVED')}" th:classappend="${status == 'RECEIVED'} ? 'current'">접수됨</a>
+        <a th:href="@{/admin/reports(status='RESOLVED')}" th:classappend="${status == 'RESOLVED'} ? 'current'">숨김 처리됨</a>
+        <a th:href="@{/admin/reports(status='DISMISSED')}" th:classappend="${status == 'DISMISSED'} ? 'current'">기각됨</a>
+    </nav>
+
+    <p th:if="${page.empty}" class="muted">해당하는 신고가 없어요.</p>
+
+    <table class="switch-table" th:unless="${page.empty}">
+        <thead>
+        <tr><th>접수</th><th>대상</th><th>사유</th><th>메모</th><th>신고자</th><th>처리</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${page.content}">
+            <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</td>
+            <td>
+                <a th:if="${r.targetHref}" th:href="${r.targetHref}" th:text="${r.targetLabel}">후기 #12</a>
+                <span th:unless="${r.targetHref}" class="muted">대상 없음</span>
+            </td>
+            <td th:text="${r.reasonLabel}">욕설·비방</td>
+            <td th:text="${r.detail} ?: '-'">-</td>
+            <td th:text="${r.reporterLabel}">닉네임</td>
+            <td>
+                <!-- 접수됨 상태에서만 처리 버튼. 숨김은 대상을 숨기고, 기각은 대상을 그대로 둔다 -->
+                <th:block th:if="${r.status == 'RECEIVED'}">
+                    <form th:action="@{/admin/reports/{id}/hide(id=${r.id})}" method="post" class="inline"
+                          onsubmit="return confirm('대상을 숨길까요? 작성자에게만 보이게 됩니다.');">
+                        <button type="submit">숨김</button>
+                    </form>
+                    <form th:action="@{/admin/reports/{id}/dismiss(id=${r.id})}" method="post" class="inline">
+                        <button type="submit">기각</button>
+                    </form>
+                </th:block>
+                <span th:unless="${r.status == 'RECEIVED'}" th:text="${r.resolutionLabel}">숨김</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav class="pager" th:if="${page.totalPages > 1}">
+        <a th:if="${page.hasPrevious()}" th:href="@{/admin/reports(status=${status}, page=${page.number - 1})}">이전</a>
+        <span th:text="|${page.number + 1} / ${page.totalPages}|">1 / 3</span>
+        <a th:if="${page.hasNext()}" th:href="@{/admin/reports(status=${status}, page=${page.number + 1})}">다음</a>
+    </nav>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

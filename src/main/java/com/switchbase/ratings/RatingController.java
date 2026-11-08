@@ -126,6 +126,15 @@ public class RatingController {
         return "redirect:/switches/" + switchId;
     }
 
+    /** 평가 숨김 해제. 작성자만(그 외 404). */
+    @PostMapping("/ratings/{id}/unhide")
+    String unhide(@PathVariable Long id, @AuthenticationPrincipal MemberUserDetails member,
+                  RedirectAttributes redirect) {
+        Long switchId = ratingService.unhide(id, member.getId());
+        redirect.addFlashAttribute("message", "평가 숨김을 풀었어요.");
+        return "redirect:/switches/" + switchId;
+    }
+
     // ---- 내부 ----
 
     private void renderForm(Long memberId, Long switchId, Long ratingId, Model model) {

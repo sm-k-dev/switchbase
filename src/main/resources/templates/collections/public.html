@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('컬렉션')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <!-- 닉네임은 서버가 memberNickname을 넘길 때만 쓴다. 없으면 회원 번호로 표시한다(이메일은 어디에도 없다) -->
+    <h1 th:text="${memberNickname} ?: |회원 #${memberId}의 컬렉션|">회원의 컬렉션</h1>
+
+    <!-- 상태 탭 -->
+    <nav class="tabs">
+        <a th:href="@{/members/{id}/collection(id=${memberId}, status='ALL')}" th:classappend="${status == 'ALL'} ? 'current'">전체</a>
+        <a th:href="@{/members/{id}/collection(id=${memberId}, status='FAVORITE')}" th:classappend="${status == 'FAVORITE'} ? 'current'">즐겨찾기</a>
+        <a th:href="@{/members/{id}/collection(id=${memberId}, status='OWNED')}" th:classappend="${status == 'OWNED'} ? 'current'">보유</a>
+        <a th:href="@{/members/{id}/collection(id=${memberId}, status='TRIED')}" th:classappend="${status == 'TRIED'} ? 'current'">써봤음</a>
+    </nav>
+
+    <p th:if="${items.empty}" class="muted">아직 표시한 스위치가 없어요.</p>
+
+    <table class="switch-table" th:unless="${items.empty}">
+        <thead>
+        <tr><th>스위치</th><th>상태</th><th>추가한 날</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="it : ${items.content}">
+            <td><a th:href="@{/switches/{id}(id=${it.switchId})}" th:text="${it.switchName}">Yellow</a></td>
+            <td th:text="${it.statusLabel}">보유</td>
+            <td th:text="${#temporals.format(it.createdAt, 'yyyy-MM-dd')}">2026-11-08</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav class="pager" th:if="${items.totalPages > 1}">
+        <a th:if="${items.hasPrevious()}"
+           th:href="@{/members/{id}/collection(id=${memberId}, status=${status}, page=${items.number - 1})}">이전</a>
+        <span th:text="|${items.number + 1} / ${items.totalPages}|">1 / 3</span>
+        <a th:if="${items.hasNext()}"
+           th:href="@{/members/{id}/collection(id=${memberId}, status=${status}, page=${items.number + 1})}">다음</a>
+    </nav>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -20,5 +20,6 @@ public record RatingView(
         boolean buildLinked,
         Instant createdAt,
         boolean mine,
-        boolean deletable) {
+        boolean deletable,
+        boolean hidden) {
 }

@@ -49,6 +49,10 @@ public class KeyboardBuild {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** 소프트 딜리트 시각(review-collection-report §6-4). 빌드는 현재 사용자가 지우지 않으므로 보관 정리에서만 쓴다. */
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     protected KeyboardBuild() {}
 
     /** 입력값은 서비스에서 검증·정규화를 마친 뒤 넘어온다. */
@@ -75,6 +79,7 @@ public class KeyboardBuild {
     }
 
     public Long getId() { return id; }
+    public Instant getDeletedAt() { return deletedAt; }
     public Member getMember() { return member; }
     public String getName() { return name; }
     public String getHousingMaterial() { return housingMaterial; }

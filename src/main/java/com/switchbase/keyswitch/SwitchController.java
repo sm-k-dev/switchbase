@@ -25,9 +25,16 @@ public class SwitchController {
 
     private final RatingService ratingService;
 
-    SwitchController(SwitchService switchService, RatingService ratingService) {
+    private final com.switchbase.reviews.ReviewService reviewService;
+    private final com.switchbase.collections.CollectionService collectionService;
+
+    SwitchController(SwitchService switchService, RatingService ratingService,
+                     com.switchbase.reviews.ReviewService reviewService,
+                     com.switchbase.collections.CollectionService collectionService) {
         this.switchService = switchService;
         this.ratingService = ratingService;
+        this.reviewService = reviewService;
+        this.collectionService = collectionService;
     }
 
     @GetMapping
@@ -47,6 +54,8 @@ public class SwitchController {
     @GetMapping("/{id}")
     String detail(@PathVariable Long id,
                   @RequestParam(value = "ratingPage", defaultValue = "0") int ratingPage,
+                  @RequestParam(value = "sort", defaultValue = "recent") String sort,
+                  @RequestParam(value = "reviewPage", defaultValue = "0") int reviewPage,
                   @AuthenticationPrincipal MemberUserDetails viewer, Model model) {
 
         model.addAttribute("sw", switchService.get(id));
@@ -54,6 +63,12 @@ public class SwitchController {
         model.addAttribute("revisions", switchService.revisionsOf(id));
         model.addAttribute("aliases", switchService.aliasesOf(id));
         model.addAttribute("switchId", id);
+        String normalizedSort = "helpful".equals(sort) ? "helpful" : "recent";
+        model.addAttribute("sort", normalizedSort);
+        model.addAttribute("reviewPage", reviewService.list(id, viewer == null ? null : viewer.getId(),
+                viewer != null && viewer.isAdmin(), normalizedSort,
+                PageRequest.of(Math.max(reviewPage, 0), RATING_PAGE_SIZE)));
+        model.addAttribute("collection", viewer == null ? null : collectionService.state(viewer.getId(), id));
         model.addAttribute("summary", ratingService.summary(id));
         model.addAttribute("ratingPage", ratingService.list(id,
                 viewer == null ? null : viewer.getId(), viewer != null && viewer.isAdmin(),
