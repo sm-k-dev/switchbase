@@ -420,3 +420,4 @@ R1·R2·R3을 고치고, 새 테스트(세션 차단, 중복 토글, 동시 토�
 **최종 판정: 통과** (권고 2건은 수정 요청이 아님. 위 본문 권고 참고)
 - V10 확인(리뷰어): `V10__drop_report_deleted_at.sql`은 `ALTER TABLE report DROP COLUMN deleted_at;` 한 줄만 있고 V9는 수정하지 않았다. 코드에 `report.deleted_at` 참조가 없어 `ddl-auto: validate`와 충돌하지 않는다. 판정 영향 없음(통과 유지).
 - V10 확인 (17:05 XML, 120개 실패 0): 통과. `V10__drop_report_deleted_at.sql` 적용 후 `SchemaMigrationTest` 포함 전체 통과. 코드 참조 없음.
+- V10 및 숨김 대상 신고 거부 확장 확인 (17:05 XML, 120개 실패 0): 통과. ReportService.create가 숨김 후기·평가·빌드를 거부(레코드 없음, 테스트 hidden{Review,Rating,Build}CannotBeReportedAndNoRecordIsCreated). 설계 §4.3·3-1·148행의 사용자 확정(숨김 후기·평가도 신고 제외)과 일치. V10은 V9 미수정, report.deleted_at 참조 없음.
