@@ -162,3 +162,31 @@ R1·R2를 결정(아키텍트)한 뒤 수정하고, 위 테스트를 추가해 X
 - 설계 문서 `build-screens.md` §2는 숨김 성공 → `/builds/{id}`로 적혀 있다. 지금 구현은 `/builds`다. 화면 문서를 맞춰 고칠 것(문서 불일치).
 - 숨김 버튼은 로그인 회원 누구나에게 보인다(Q1). 작성자가 아닌 회원이 숨긴 빌드는 숨긴 사람에게도 상세가 404로 보인다는 점은 설계상 의도다. 숨김 상세를 본 적 없는 사람이 숨기는 것이므로 화면상 문제 없음.
 - 테스트 수: BuildTest 11개(신규 2건 포함) 중 실패 0. 전체 70개 XML 합계 확인.
+
+---
+
+## 빌드 숨김 해제 작성자 전용 재리뷰
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 12개 스위트 71개 전부 통과(합계 failures 0, errors 0, 13:36 실행). 재실행 없이 XML과 소스, 문서(build-design §4·§10, build-screens §1·§4)로 판단.
+
+### 판정: 통과 (문서 표현 1건 정리 권고)
+
+### 코드 확인
+- `BuildService.unhide(id, viewerId)`: 잠금(`lockForUpdate`) → `requireVisibleTo(build, viewerId)` → 숨김이면 해제. `requireVisibleTo`는 숨김 빌드에 대해 작성자가 아니면 `NoSuchElementException`(404)을 던진다. 관리자는 작성자가 아니므로 같은 404다.
+- 공개 빌드에 대한 해제 요청: `requireVisibleTo`가 통과하고 `if (build.isHidden())`이 거짓이라 상태를 바꾸지 않는다. 버전도 오르지 않는다(변경 없음). 무해하다.
+- `BuildController.unhide`: `viewerId(viewer)`를 넘기고, 성공 시 `/builds/{id}`(flash "다시 공개했어요.")로 보낸다. 해제 뒤 빌드는 공개이므로 상세는 200이다.
+- `hide`는 권한 변경 없음(Q1, 로그인 회원 누구나). 목적지 `/builds`는 그대로다.
+
+### 테스트 확인
+- `onlyOwnerCanUnhideAndOthersGetNotFound`: 다른 회원과 **관리자 세션**의 해제 POST → 404, 상태 유지(`isHidden` true 확인), 작성자 해제 → 상세 리다이렉트, 상세 200. 관리자 포함 404가 테스트로 확인된다.
+- `hideRemovesFromListAndUnhideRestores`: 숨긴 사람(다른 회원)의 해제 → 404, 작성자 해제 → 리다이렉트와 flash, 목록 복귀를 확인한다.
+- `otherMemberGetsNotFoundForHiddenBuildEditAndUpdate`(이전 리뷰)와 함께, 다른 회원·관리자는 숨김 빌드의 조회·편집 GET·수정 POST·해제 모두 404다.
+
+### 문서와 코드 일치
+- build-design §4, 숨김 해제 행: "작성자만(사용자 확정). 관리자 포함 불가, 그 외 404". 구현과 일치한다.
+- build-screens §1, 숨김 해제 행: "필요 (작성자만)", 성공 → `/builds/{id}`. 일치한다.
+- build-screens §4, 해제 버튼: 작성자이면서 `hidden`일 때만 보인다. 일치한다.
+- **문서 표현 정리 권고**: "그 외 404"는 숨김 빌드에 한정된다. 공개 빌드에 대한 해제 요청은 404가 아니라 상태 변화 없이 상세로 보내진다(무해). 설계 §4 해당 행에 "숨김 빌드에 한해"를 붙이면 문서와 코드의 차이가 없어진다.
+
+### 메모 (수정 요청 아님)
+- 작성자가 아닌 회원이 숨긴 빌드는 숨긴 사람도 해제할 수 없고, 작성자만 풀 수 있다. 이것이 확정 사항이며 §10에 기록되어 있다.
