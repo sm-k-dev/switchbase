@@ -4,6 +4,7 @@ import com.switchbase.member.MemberUserDetails;
 import com.switchbase.member.MemberUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -25,6 +26,9 @@ class SecurityConfig {
                 .authenticationProvider(memberAuthenticationProvider(userDetailsService, passwordEncoder))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // 위키: 수정·되돌리기는 로그인 회원만. 상세·이력·비교·최근 변경은 누구나 본다 (wiki-design §5.6)
+                        .requestMatchers(HttpMethod.GET, "/switches/*/edit", "/switches/*/revisions/*/revert").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/switches/*", "/switches/*/revisions/*/revert").authenticated()
                         .anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")              // 우리가 만든 로그인 화면

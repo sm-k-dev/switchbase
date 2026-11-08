@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('최근 변경')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>최근 변경</h1>
+
+    <p th:if="${page.empty}" class="muted">아직 변경이 없어요.</p>
+
+    <table class="switch-table" th:unless="${page.empty}">
+        <thead>
+        <tr><th>스위치</th><th>번호</th><th>시각</th><th>편집자</th><th>요약</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${page.content}">
+            <td><a th:href="@{/switches/{id}(id=${r.keyboardSwitch.id})}"
+                   th:text="${r.keyboardSwitch.spec.variant} ? |${r.keyboardSwitch.spec.modelName} (${r.keyboardSwitch.spec.variant})| : ${r.keyboardSwitch.spec.modelName}">Yellow</a></td>
+            <td th:text="|#${r.revisionNo}|">#1</td>
+            <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</td>
+            <td th:text="${r.editorDisplay}">초기 관리자</td>
+            <td th:text="${r.editSummary}">처음 등록</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav class="pager" th:if="${page.totalPages > 1}">
+        <a th:if="${page.hasPrevious()}" th:href="@{/changes(page=${page.number - 1})}">이전</a>
+        <span th:text="|${page.number + 1} / ${page.totalPages}|">1 / 3</span>
+        <a th:if="${page.hasNext()}" th:href="@{/changes(page=${page.number + 1})}">다음</a>
+    </nav>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

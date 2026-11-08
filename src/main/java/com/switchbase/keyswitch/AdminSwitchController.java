@@ -2,14 +2,12 @@ package com.switchbase.keyswitch;
 
 import com.switchbase.member.MemberUserDetails;
 import jakarta.validation.Valid;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,32 +52,6 @@ class AdminSwitchController {
                 form.toSpec(), form.aliasList(), form.getEditSummary(),
                 editor.getId(), editor.getNickname(), form.getSourceUrl());
         return "redirect:/switches/" + saved.getId();
-    }
-
-    @GetMapping("/{id}/edit")
-    String editForm(@PathVariable Long id, Model model) {
-        model.addAttribute("form", SwitchForm.from(switchService.get(id), switchService.aliasesOf(id)));
-        model.addAttribute("switchId", id);
-        return "admin/switch-form";
-    }
-
-    @PostMapping("/{id}")
-    String update(@PathVariable Long id,
-                  @Valid @ModelAttribute("form") SwitchForm form, BindingResult binding,
-                  @AuthenticationPrincipal MemberUserDetails editor, Model model) {
-        if (binding.hasErrors()) {
-            model.addAttribute("switchId", id);
-            return "admin/switch-form";
-        }
-        try {
-            switchService.update(id, form.getVersion(), form.toSpec(), form.aliasList(),
-                    form.getEditSummary(), editor.getId(), editor.getNickname(), form.getSourceUrl());
-        } catch (OptimisticLockingFailureException e) {
-            binding.reject("conflict", "그 사이 다른 사람이 먼저 고쳤어요. 새로고침 후 다시 해 주세요.");
-            model.addAttribute("switchId", id);
-            return "admin/switch-form";
-        }
-        return "redirect:/switches/" + id;
     }
 
     @GetMapping("/import")

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('스위치 수정')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>스위치 수정</h1>
+    <p class="muted">수정하면 바로 공개됩니다.</p>
+
+    <form th:object="${form}" method="post" class="switch-form"
+          th:action="@{/switches/{id}(id=${switchId})}">
+        <th:block th:replace="~{admin/switch-form-fields :: fields}"></th:block>
+    </form>
+    <p><a th:href="@{/switches/{id}(id=${switchId})}">취소하고 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

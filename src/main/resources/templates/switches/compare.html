@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(|${sw.spec.modelName} 비교|)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <p class="muted"><a th:href="@{/switches/{id}(id=${sw.id})}" th:text="${sw.spec.modelName}">Yellow</a> · <a th:href="@{/switches/{id}/history(id=${sw.id})}">수정 이력</a></p>
+    <h1>수정 비교</h1>
+    <p class="muted" th:text="|#${from.revisionNo} → #${to.revisionNo}|">#1 → #2</p>
+
+    <table class="switch-table">
+        <thead>
+        <tr><th>항목</th><th th:text="|#${from.revisionNo}|">#1</th><th th:text="|#${to.revisionNo}|">#2</th><th>상태</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${rows}" th:classappend="${row.changed()} ? 'changed'">
+            <td th:text="${row.label()}">입력압</td>
+            <td th:text="${row.fromValue()}">-</td>
+            <td th:text="${row.toValue()}">-</td>
+            <td><strong th:if="${row.changed()}">변경</strong></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>설명</h2>
+    <p class="muted">설명은 전후를 나란히 보여 줘요.</p>
+    <table class="switch-table" th:with="same=${descriptionFrom == descriptionTo}">
+        <thead>
+        <tr><th th:text="|#${from.revisionNo}|">#1</th><th th:text="|#${to.revisionNo}|">#2</th></tr>
+        </thead>
+        <tbody>
+        <tr th:classappend="${!same} ? 'changed'">
+            <td th:text="${descriptionFrom}">-</td>
+            <td th:text="${descriptionTo}">-</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:unless="${same}"><strong>변경</strong></p>
+
+    <p><a th:href="@{/switches/{id}/history(id=${sw.id})}">수정 이력으로 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

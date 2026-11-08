@@ -1,0 +1,52 @@
+<!-- 스위치 입력 폼의 공용 필드 조각. 새 등록(admin/switch-form)과 수정(switches/edit)이 같이 쓴다.
+     사용: <th:block th:replace="~{admin/switch-form-fields :: fields}"></th:block>
+     th:object="${form}" 인 form 안에서만 쓴다. switchId가 있으면(수정) 별칭 안내를 보여 준다. -->
+<th:block th:fragment="fields" xmlns:th="http://www.thymeleaf.org">
+    <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+    <input type="hidden" th:field="*{version}">
+
+    <label>제조사 <input th:field="*{manufacturer}" required></label>
+    <p class="error" th:errors="*{manufacturer}"></p>
+
+    <label>브랜드 (콜라보일 때만) <input th:field="*{brand}" placeholder="기획/판매한 쪽"></label>
+    <p class="error" th:errors="*{brand}"></p>
+
+    <label>이름 (제조사 공식 표기) <input th:field="*{modelName}" required></label>
+    <p class="error" th:errors="*{modelName}"></p>
+
+    <label>변형 (같은 이름에 무게만 다를 때) <input th:field="*{variant}" placeholder="예: 45g"></label>
+    <p class="error" th:errors="*{variant}"></p>
+
+    <label>종류
+        <select th:field="*{switchType}" required>
+            <option value="">고르세요</option>
+            <option th:each="t : ${types}" th:value="${t}" th:text="${t.label}"></option>
+        </select>
+    </label>
+    <p class="error" th:errors="*{switchType}"></p>
+
+    <label>입력압 (g) <input type="number" step="0.1" th:field="*{actuationForceG}"></label>
+    <p class="error" th:errors="*{actuationForceG}"></p>
+    <label>바닥압 (g) <input type="number" step="0.1" th:field="*{bottomOutForceG}"></label>
+    <p class="error" th:errors="*{bottomOutForceG}"></p>
+    <label>입력 지점 (mm) <input type="number" step="0.1" th:field="*{preTravelMm}"></label>
+    <p class="error" th:errors="*{preTravelMm}"></p>
+    <label>키 깊이 (mm) <input type="number" step="0.1" th:field="*{totalTravelMm}"></label>
+    <p class="error" th:errors="*{totalTravelMm}"></p>
+    <label>출시 연도 <input type="number" th:field="*{releaseYear}"></label>
+    <p class="error" th:errors="*{releaseYear}"></p>
+
+    <label>다른 이름 (한 줄에 하나) <textarea th:field="*{aliases}" rows="3" placeholder="저월백&#10;저소음 월백"></textarea></label>
+    <p class="error" th:errors="*{aliases}"></p>
+    <p class="muted" th:if="${switchId}">별칭과 출처는 되돌리기에 포함되지 않아요.</p>
+
+    <label>설명 <textarea th:field="*{description}" rows="4"></textarea></label>
+
+    <label>출처 URL (선택) <input type="url" th:field="*{sourceUrl}" placeholder="https://"></label>
+    <p class="error" th:errors="*{sourceUrl}"></p>
+
+    <label>무엇을 바꿨나요 <input th:field="*{editSummary}" required placeholder="예: 공식 스펙표 기준으로 입력압 수정"></label>
+    <p class="error" th:errors="*{editSummary}"></p>
+
+    <button type="submit">저장</button>
+</th:block>

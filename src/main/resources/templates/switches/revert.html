@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(|${sw.spec.modelName} 수정 취소|)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <p class="muted"><a th:href="@{/switches/{id}(id=${sw.id})}" th:text="${sw.spec.modelName}">Yellow</a> · <a th:href="@{/switches/{id}/history(id=${sw.id})}">수정 이력</a></p>
+    <h1 th:text="|#${target.revisionNo} 수정 취소|">#2 수정 취소</h1>
+
+    <!-- 권한이 없거나 최신 수정이 아니면 되돌릴 내용과 버튼을 보여 주지 않는다 -->
+    <p th:unless="${canRevert}" class="error" th:text="${denyReason} ?: '이 수정은 취소할 수 없어요.'">작성자 본인이나 관리자만 취소할 수 있어요.</p>
+
+    <th:block th:if="${canRevert}">
+        <p>이 수정을 취소하면 아래 내용이 #<span th:text="${previous.revisionNo}">1</span> 상태로 돌아가요. 새 수정으로 기록되고, 이전 기록은 그대로 남아요.</p>
+
+        <table class="switch-table">
+            <thead>
+            <tr><th>항목</th><th th:text="|#${previous.revisionNo} (되돌린 뒤)|">#1 (되돌린 뒤)</th><th th:text="|#${target.revisionNo} (현재)|">#2 (현재)</th><th>상태</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${rows}" th:classappend="${row.changed()} ? 'changed'">
+                <td th:text="${row.label()}">입력압</td>
+                <td th:text="${row.fromValue()}">-</td>
+                <td th:text="${row.toValue()}">-</td>
+                <td><strong th:if="${row.changed()}">변경</strong></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p class="muted">별칭과 출처는 되돌리기에 포함되지 않아요.</p>
+
+        <form th:object="${form}" method="post"
+              th:action="@{/switches/{id}/revisions/{no}/revert(id=${sw.id}, no=${target.revisionNo})}">
+            <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+            <input type="hidden" th:field="*{version}">
+            <label>편집 요약 (선택)
+                <input th:field="*{editSummary}" th:placeholder="|#${target.revisionNo} 수정 취소|">
+            </label>
+            <p class="error" th:errors="*{editSummary}"></p>
+            <button type="submit">이 수정 취소</button>
+        </form>
+    </th:block>
+
+    <p><a th:href="@{/switches/{id}/history(id=${sw.id})}">수정 이력으로 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(|${sw.spec.modelName} 이력|)}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <p class="muted"><a th:href="@{/switches/{id}(id=${sw.id})}" th:text="${sw.spec.modelName}">Yellow</a> · 수정 이력</p>
+    <h1>수정 이력</h1>
+
+    <p th:if="${revisions.empty}" class="muted">아직 수정 이력이 없어요.</p>
+
+    <form th:unless="${revisions.empty}" method="get"
+          th:action="@{/switches/{id}/compare(id=${sw.id})}">
+        <table class="switch-table">
+            <thead>
+            <tr><th>번호</th><th>시각</th><th>편집자</th><th>요약</th><th>이전 쪽</th><th>나중 쪽</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${revisions}">
+                <td th:text="|#${r.revisionNo}|">#1</td>
+                <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</td>
+                <td th:text="${r.editorDisplay}">초기 관리자</td>
+                <td th:text="${r.editSummary}">처음 등록</td>
+                <td><input type="radio" name="from" th:value="${r.revisionNo}" aria-label="이전 쪽 선택"></td>
+                <td><input type="radio" name="to" th:value="${r.revisionNo}" aria-label="나중 쪽 선택"></td>
+            </tr>
+            </tbody>
+        </table>
+        <p><button type="submit">선택한 두 수정 비교</button></p>
+    </form>
+
+    <p><a th:href="@{/switches/{id}(id=${sw.id})}">스위치로 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

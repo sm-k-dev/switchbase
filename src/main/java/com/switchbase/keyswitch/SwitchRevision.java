@@ -65,6 +65,10 @@ public class SwitchRevision {
         return editSummary;
     }
 
+    public KeyboardSwitch getKeyboardSwitch() {
+        return keyboardSwitch;
+    }
+
     public Long getEditorMemberId() {
         return editorMemberId;
     }

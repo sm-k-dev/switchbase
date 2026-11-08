@@ -47,6 +47,8 @@ public class MemberUserDetails implements UserDetails, Serializable {
 
     public Long getId() { return id; }
 
+    public boolean isAdmin() { return role == Role.ADMIN; }
+
     public String getNickname() { return nickname; }
 
     public boolean isEmailVerified() { return emailVerified; }
