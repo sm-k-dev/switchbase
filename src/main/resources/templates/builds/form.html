@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${buildId} ? '빌드 수정' : '빌드 등록')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1 th:text="${buildId} ? '빌드 수정' : '빌드 등록'">빌드 등록</h1>
+
+    <form th:object="${form}" method="post" class="switch-form"
+          th:action="${buildId} ? @{/builds/{id}(id=${buildId})} : @{/builds}">
+        <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+        <input type="hidden" th:field="*{version}">
+
+        <label>이름 (선택, 비우면 "내 키보드"로 보여요)
+            <input th:field="*{name}" maxlength="50" placeholder="예: 출근용 키보드">
+        </label>
+        <p class="error" th:errors="*{name}"></p>
+
+        <label>하우징
+            <select th:field="*{housingMaterial}">
+                <option value="">미지정</option>
+                <option th:each="o : ${housingOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{housingMaterial}"></p>
+
+        <label>보강판
+            <select th:field="*{plateMaterial}">
+                <option value="">미지정</option>
+                <option th:each="o : ${plateOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{plateMaterial}"></p>
+
+        <label>마운트
+            <select th:field="*{mountType}">
+                <option value="">미지정</option>
+                <option th:each="o : ${mountOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{mountType}"></p>
+
+        <label>키캡
+            <select th:field="*{keycapMaterial}">
+                <option value="">미지정</option>
+                <option th:each="o : ${keycapOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{keycapMaterial}"></p>
+
+        <label>메모 (500자 이내, "기타" 설명도 여기에 적어 주세요)
+            <textarea th:field="*{memo}" rows="6" maxlength="500"></textarea>
+        </label>
+        <p class="error" th:errors="*{memo}"></p>
+
+        <button type="submit">저장</button>
+    </form>
+    <p><a th:href="${buildId} ? @{/builds/{id}(id=${buildId})} : @{/builds}">취소하고 돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${build.displayName})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <p class="muted" th:text="|작성자 ${build.ownerNickname}|">작성자 닉네임</p>
+    <h1 th:text="${build.displayName}">내 키보드</h1>
+
+    <p th:if="${message}" class="notice" th:text="${message}"></p>
+    <p th:if="${build.hidden}" class="error">숨김 상태예요. 작성자에게만 보여요.</p>
+
+    <table class="spec-table">
+        <tr><th>하우징</th><td th:text="${build.housingLabel} ?: '미지정'">미지정</td></tr>
+        <tr><th>보강판</th><td th:text="${build.plateLabel} ?: '미지정'">미지정</td></tr>
+        <tr><th>마운트</th><td th:text="${build.mountLabel} ?: '미지정'">미지정</td></tr>
+        <tr><th>키캡</th><td th:text="${build.keycapLabel} ?: '미지정'">미지정</td></tr>
+    </table>
+
+    <h2>메모</h2>
+    <p th:if="${build.memo}" th:text="${build.memo}"></p>
+    <p th:unless="${build.memo}" class="muted">메모가 없어요.</p>
+
+    <!-- 수정·숨김 버튼은 로그인 회원에게만 보인다. 실제 권한은 서버가 확인한다 -->
+    <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/builds/{id}/edit(id=${build.id})}">수정</a>
+        <form th:unless="${build.hidden}" th:action="@{/builds/{id}/hide(id=${build.id})}" method="post" class="inline"
+              onsubmit="return confirm('숨기면 목록과 상세에서 보이지 않고 작성자에게만 보여요. 나중에 숨김 해제할 수 있어요. 숨길까요?');">
+            <button type="submit">숨김</button>
+        </form>
+        <form th:if="${build.hidden}" th:action="@{/builds/{id}/unhide(id=${build.id})}" method="post" class="inline">
+            <button type="submit">숨김 해제</button>
+        </form>
+    </div>
+
+    <p><a th:href="@{/builds}">목록으로</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
