@@ -13,9 +13,16 @@ public record BuildView(
         String mountLabel,
         String keycapLabel,
         String memo,
-        boolean hidden) {
+        boolean hidden,
+        boolean mine) {
 
+    /** 작성자 표시 없이 만든다(목록 등). 상세처럼 로그인 회원이 필요하면 from(b, viewerId)를 쓴다. */
     public static BuildView from(KeyboardBuild b) {
+        return from(b, null);
+    }
+
+    /** viewerId가 작성자와 같으면 mine=true (신고 버튼 숨김과 수정 버튼 표시에 쓴다). */
+    public static BuildView from(KeyboardBuild b, Long viewerId) {
         String name = b.getName();
         return new BuildView(
                 b.getId(),
@@ -26,7 +33,8 @@ public record BuildView(
                 label(BuildPart.MOUNT, b.getMountType()),
                 label(BuildPart.KEYCAP, b.getKeycapMaterial()),
                 b.getMemo(),
-                b.isHidden());
+                b.isHidden(),
+                viewerId != null && viewerId.equals(b.getMember().getId()));
     }
 
     /** 미지정(null)은 null, 목록에 없는 옛 코드는 코드 그대로. */

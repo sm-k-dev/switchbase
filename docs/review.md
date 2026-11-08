@@ -372,3 +372,51 @@ R1·R2·R3을 고치고, 새 테스트(세션 차단, 중복 토글, 동시 토�
 ### 메모 (수정 요청 아님)
 - 중복 클릭 때 `toggle`은 두 번째 호출에서도 `true`를 돌려주므로 "넣었어요" 메시지가 나온다. 상태는 맞다. 화면 문구를 정밀하게 하고 싶으면 삽입 행 수(`insertIgnore` 반환값 0)를 써서 "이미 있어요"로 바꿀 수 있다. 필수는 아니다.
 - R1의 필터는 탈퇴 여부를 요청마다 DB에서 확인하므로, 탈퇴 직후 다른 세션의 첫 요청에서 막힌다.
+
+---
+
+## 후기·컬렉션·신고 판정 (커밋 702f98a·e081c6c·ccfbec7 + 미커밋 빌드·신고 변경)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 16:51 실행 — 16개 스위트 118개 전부 통과(failures 0, errors 0, skipped 0). 신규 `ReportBuildTest` 10건 포함(`adminReportListRendersWithHiddenState`, `hiddenBuildCannotBeReportedAndNoRecordIsCreated`, `alreadyHiddenBuildCannotBeHiddenAgainByAdmin` 등). 테스트는 재실행하지 않음.
+
+### 판정: 통과
+
+### 기준 문서 참고
+- `review-collection-report-design.md`에는 "§7-3"이라는 절이 없다. 리뷰어 확인 항목은 §7 작업 분담의 3번(리뷰어)이고, 숨김 빌드 신고 제외는 §4.3(143행)과 Q9(190행)에 확정되어 있다. 이 두 곳을 기준으로 봤다.
+
+### 확인 항목 (§7-3 대응: 리뷰어 체크리스트)
+- **탈퇴 범위 누출**: 이전 판정 그대로 통과. 이메일·해시는 NULL, 신고·관리자 화면에 이메일 없음(`ReportView`는 닉네임 또는 "탈퇴한 회원"만).
+- **신고 기록 보존**: `ReportService.view`가 탈퇴한 신고자를 "탈퇴한 회원"으로 보여 준다. 처리 기록은 남는다.
+- **숨김 빌드 신고 제외 (미커밋 변경)**: `ReportService.create`가 `BUILD`이면서 숨김인 대상을 거부한다(NoSuchElement → 404, 기록 없음). 테스트 `hiddenBuildCannotBeReportedAndNoRecordIsCreated` 통과. 삭제된 빌드도 `resolve`에서 제외(`deletedBuildCannotBeReported`).
+- **관리자 숨김 중복**: 이미 숨긴 빌드를 다시 숨기려고 하면 거부하고 메시지를 준다(`alreadyHiddenBuildCannotBeHiddenAgainByAdmin`). 컨트롤러가 `IllegalArgumentException`을 잡아 목록으로 돌려보낸다.
+- **접수 뒤 숨김**: 접수된 뒤 작성자가 숨기면 관리자 목록에서 대상 상태가 "숨김"으로 보인다(`hiddenBuildAfterReportShowsHiddenStateInAdminList`, `adminReportListRendersWithHiddenState`).
+- **빌드 상세 신고 버튼**: 공개 빌드이고 본인 빌드가 아닐 때만 보인다(`detailShowsReportButtonOnlyForOthersPublicBuild`). 숨김 빌드는 타인에게 404라 버튼이 보이지 않는다.
+- **중복 신고**: 같은 회원이 같은 빌드를 두 번 신고하면 거부(`sameBuildCannotBeReportedTwiceByOneMember`). 본인 빌드 신고는 거부(`ownBuildCannotBeReported`).
+- **숨김 빌드 상세**: 작성자는 200, 다른 회원은 404(`hiddenBuildDetailIsNotFoundForOthersButOkForOwner`).
+- **이전 판정 항목 유지**: 부분 유니크, 재가입 차단, 집계 제외 세 조건, 스케줄 작업 멱등성, 숨김 해제·조회의 작성자 전용, 공개 컬렉션 404는 앞 재리뷰(R1~R3)에서 통과한 상태를 유지한다. 이번 미커밋 변경은 이 항목들을 건드리지 않았다.
+
+### 미커밋 파일 목록 (검토 대상)
+- `docs/HANDOFF.md`
+- `docs/work/review-collection-report-design.md`
+- `src/main/java/com/switchbase/builds/BuildController.java`
+- `src/main/java/com/switchbase/builds/BuildView.java`
+- `src/main/java/com/switchbase/reports/AdminReportController.java`
+- `src/main/java/com/switchbase/reports/ReportService.java`
+- `src/main/java/com/switchbase/reports/ReportView.java`
+- `src/main/resources/templates/admin/reports.html`
+- `src/main/resources/templates/builds/detail.html`
+- `src/test/java/com/switchbase/reports/ReportBuildTest.java` (신규)
+
+### 권고 (수정 요청 아님)
+- **관리자 목록의 죽은 링크**: 숨김 빌드를 신고 목록에서 누르면 `/builds/{id}`로 가는데, 관리자는 작성자가 아니라 404가 난다. 대상 상태가 "숨김"이면 링크를 빼거나 상태 문구만 보여 주는 편이 낫다. 설계 §4.3 "관리자도 숨김 내용을 볼 수 없다"와 맞춘다.
+- **숨김 후기·평가 신고**: 제외는 빌드에만 적용되어 있다. 숨김 후기·평가는 다른 회원에게 목록에서 안 보이지만, 임의 id로 신고 화면을 열어 존재를 확인할 수 있다(앞 리뷰 권고와 같음). 설계에 없는 제외이므로 아키텍트가 범위를 정할 것.
+- **관리자 목록 링크 문구**: `targetHref`가 있으면 "후기 #12" 같은 링크를 쓰고, 없으면 `targetState`만 보인다. 대상이 숨김이면 링크와 상태가 함께 나오므로 위 링크 권고와 같이 정리하면 된다.
+
+### 최종 확인 (16:56 XML)
+- 최종 XML(16:56 실행): 16개 스위트 118개, failures 0, errors 0, skipped 0. 앞 판정(16:51)과 같은 테스트 수이며 신고 테스트 10건(`ReportBuildTest`)이 모두 포함.
+- 판정 대상 미커밋 소스 변경은 앞 판정 때와 같다: `BuildController`, `BuildView`, `AdminReportController`, `ReportService`, `ReportView`, `admin/reports.html`, `builds/detail.html`, `src/test/.../reports/`. 판정 이후 소스 변경은 없다.
+- 새로 보인 미추적 문서 `docs/work/review-dev-questions.md`는 코드가 아니므로 판정에 영향이 없다.
+
+**최종 판정: 통과** (권고 2건은 수정 요청이 아님. 위 본문 권고 참고)
+- V10 확인(리뷰어): `V10__drop_report_deleted_at.sql`은 `ALTER TABLE report DROP COLUMN deleted_at;` 한 줄만 있고 V9는 수정하지 않았다. 코드에 `report.deleted_at` 참조가 없어 `ddl-auto: validate`와 충돌하지 않는다. 판정 영향 없음(통과 유지).
+- V10 확인 (17:05 XML, 120개 실패 0): 통과. `V10__drop_report_deleted_at.sql` 적용 후 `SchemaMigrationTest` 포함 전체 통과. 코드 참조 없음.

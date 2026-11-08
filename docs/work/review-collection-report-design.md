@@ -19,74 +19,113 @@
 ## 2. 현재 상태
 
 - 평가(`rating`): 스위치×빌드 조합당 1건, 수정은 작성자, 삭제는 작성자 또는 관리자. 숨김 개념 없음. 집계 캐시는 평가 저장 때 동기 갱신.
-- 빌드(`keyboard_build`): `hidden` 플래그가 있고, 숨김 빌드는 작성자에게만 보인다. 신고 대상이 될 수 있는지는 §6 Q9.
+- 빌드(`keyboard_build`): `hidden` 플래그가 있고, 숨김 빌드는 작성자에게만 보인다. 공개 빌드만 신고 대상이다(§4.3).
 - 회원(`member`): 로그인 이름은 이메일, 공개 이름은 닉네임. 이메일은 어떤 화면에도 나오지 않는다(0단계 규칙을 그대로 따른다).
 - 스위치 상세 화면(`switches/detail`)에 평가 목록(`ratings/section`)이 include되어 있다. 후기도 같은 위치에 붙는다.
 
 ## 3. 데이터 초안: `V9__create_review_collection_report.sql` (V1~V8 수정 금지)
 
 ```sql
--- 컬렉션 공개 여부는 회원 단위 한 번 설정(§6 Q8)
+-- ===== 기존 테이블 변경 (V1~V8 수정 금지, V9에서만 ALTER) =====
+
+-- 회원: 탈퇴 시각(소프트 딜리트), 익명화를 위해 이메일·해시 NULL 허용, 컬렉션 공개 설정(§6 Q8)
+ALTER TABLE member ADD COLUMN deleted_at TIMESTAMPTZ;
+ALTER TABLE member ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE member ALTER COLUMN password_hash DROP NOT NULL;
 ALTER TABLE member ADD COLUMN collection_public BOOLEAN NOT NULL DEFAULT FALSE;
 
--- 신고 처리로 숨긴 평가는 집계에서 제외(§6 Q14). rating 테이블 변경이므로 V8 집계 규칙과 함께 바뀐다
+-- 평가: 숨김(§6 Q14, Q12)과 소프트 딜리트(§6-4)
 ALTER TABLE rating ADD COLUMN hidden BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE rating ADD COLUMN deleted_at TIMESTAMPTZ;
+-- 기존 테이블 제약을 부분 유니크 인덱스로 교체: 삭제된 행은 같은 조합으로 다시 쓸 수 있다
+ALTER TABLE rating DROP CONSTRAINT uk_rating_switch_member_build;
+CREATE UNIQUE INDEX uk_rating_active ON rating (switch_id, member_id, build_id) NULLS NOT DISTINCT
+    WHERE deleted_at IS NULL;
+
+-- 빌드: 탈퇴 시에만 소프트 딜리트(삭제 기능은 없음, §6-4)
+ALTER TABLE keyboard_build ADD COLUMN deleted_at TIMESTAMPTZ;
+
+-- ===== 신규 테이블 =====
+
+-- 재가입 차단: 이메일 해시와 만료 시각(탈퇴일 + 30일, §6-5 Q15, Q19)
+CREATE TABLE signup_block (
+    email_hash    VARCHAR(64)  PRIMARY KEY,   -- 이메일 소문자 정규화 후 SHA-256 hex
+    blocked_until TIMESTAMPTZ  NOT NULL
+);
+CREATE INDEX ix_signup_block_until ON signup_block (blocked_until);
 
 -- 후기 (글). 스위치당 1건, 수정으로 갱신(§6 Q2)
 CREATE TABLE review (
-    id               BIGSERIAL    PRIMARY KEY,
-    switch_id        BIGINT       NOT NULL REFERENCES keyboard_switch (id) ON DELETE CASCADE,
-    member_id        BIGINT       NOT NULL REFERENCES member (id) ON DELETE CASCADE,
+    id               BIGSERIAL     PRIMARY KEY,
+    switch_id        BIGINT        NOT NULL REFERENCES keyboard_switch (id) ON DELETE CASCADE,
+    member_id        BIGINT        NOT NULL REFERENCES member (id) ON DELETE CASCADE,
     body             VARCHAR(2000) NOT NULL,
-    recommended_for  VARCHAR(100),          -- 추천 대상 고정 코드를 쉼표로 구분(§6 Q4, 여러 개 선택)
-    helpful_count    INT          NOT NULL DEFAULT 0,  -- 도움됨 수 (비정규화 캐시, review_vote에서 갱신)
-    hidden           BOOLEAN      NOT NULL DEFAULT FALSE, -- 신고 처리로 숨김 (§6 Q12, Q13)
-    version          BIGINT       NOT NULL DEFAULT 0,
-    created_at       TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at       TIMESTAMPTZ  NOT NULL DEFAULT now()
+    recommended_for  VARCHAR(100),           -- 추천 대상 고정 코드, 쉼표 구분(§6 Q4)
+    helpful_count    INT           NOT NULL DEFAULT 0,   -- review_vote 행 수로 다시 계산해 저장(§6 R2)
+    hidden           BOOLEAN       NOT NULL DEFAULT FALSE, -- 신고 처리 숨김(§6 Q12, Q13)
+    version          BIGINT        NOT NULL DEFAULT 0,
+    deleted_at       TIMESTAMPTZ,            -- 소프트 딜리트(§6-4)
+    created_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    updated_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
 );
+-- 스위치당 활성 후기 1건(§6 Q2). 삭제된 후기는 제외
+CREATE UNIQUE INDEX uk_review_active ON review (switch_id, member_id) WHERE deleted_at IS NULL;
 CREATE INDEX ix_review_switch ON review (switch_id, created_at DESC);
 
--- 도움됨 누른 사람 (회원당 1회, 토글은 행 추가/삭제)
+-- 도움됨 투표 (회원당 1회, 토글은 행 추가/삭제). 탈퇴 시 즉시 하드 삭제(§6-4)
 CREATE TABLE review_vote (
     review_id  BIGINT NOT NULL REFERENCES review (id) ON DELETE CASCADE,
     member_id  BIGINT NOT NULL REFERENCES member (id) ON DELETE CASCADE,
     PRIMARY KEY (review_id, member_id)
 );
 
--- 컬렉션: 회원 × 스위치 × 상태. 각 상태는 독립 토글(§6 Q7)
+-- 컬렉션: 회원 × 스위치 × 상태, 독립 토글(§6 Q7). 해제는 하드 삭제(§6-5 Q18)
 CREATE TABLE collection_item (
     member_id  BIGINT      NOT NULL REFERENCES member (id) ON DELETE CASCADE,
     switch_id  BIGINT      NOT NULL REFERENCES keyboard_switch (id) ON DELETE CASCADE,
-    status     VARCHAR(20) NOT NULL,       -- FAVORITE(즐겨찾기), OWNED(보유), TRIED(써봄)
+    status     VARCHAR(20) NOT NULL,        -- FAVORITE, OWNED, TRIED
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (member_id, switch_id, status),
     CONSTRAINT ck_collection_status CHECK (status IN ('FAVORITE','OWNED','TRIED'))
 );
 CREATE INDEX ix_collection_switch ON collection_item (switch_id);
 
--- 신고 1건. 회원당 대상당 1회(§6 Q10): 유일 키로 DB가 보장
+-- 신고 1건. 회원당 대상당 1회(§6 Q10). 신고자 탈퇴 시 연결만 끊는다(§6-4)
 CREATE TABLE report (
-    id                 BIGSERIAL    PRIMARY KEY,
-    reporter_member_id BIGINT       NOT NULL REFERENCES member (id) ON DELETE CASCADE,
-    target_type        VARCHAR(20)  NOT NULL,  -- REVIEW, RATING, BUILD (§6 Q9)
-    target_id          BIGINT       NOT NULL,
-    reason_code        VARCHAR(30)  NOT NULL,  -- 고정 사유 코드 (§6 Q11)
-    detail             VARCHAR(500),           -- 자유 메모
-    status             VARCHAR(20)  NOT NULL,  -- RECEIVED, RESOLVED, DISMISSED
-    resolution         VARCHAR(20),            -- HIDDEN, DISMISSED 등 처리 결과 (§6 Q12)
-    handled_by_member_id BIGINT     REFERENCES member (id) ON DELETE SET NULL,
-    handled_at         TIMESTAMPTZ,
-    created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    id                   BIGSERIAL    PRIMARY KEY,
+    reporter_member_id   BIGINT       REFERENCES member (id) ON DELETE SET NULL,
+    target_type          VARCHAR(20)  NOT NULL,   -- REVIEW, RATING, BUILD (§6 Q9)
+    target_id            BIGINT       NOT NULL,
+    reason_code          VARCHAR(30)  NOT NULL,   -- 고정 사유 코드(§6 Q11)
+    detail               VARCHAR(500),            -- 자유 메모
+    status               VARCHAR(20)  NOT NULL,   -- RECEIVED, RESOLVED, DISMISSED
+    resolution           VARCHAR(20),             -- HIDDEN, DISMISSED(§6 Q12)
+    handled_by_member_id BIGINT       REFERENCES member (id) ON DELETE SET NULL,
+    handled_at           TIMESTAMPTZ,
+    deleted_at           TIMESTAMPTZ,             -- 소프트 딜리트(§6-4). 신고 기록은 기본 보존
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT ck_report_target CHECK (target_type IN ('REVIEW','RATING','BUILD')),
-    CONSTRAINT ck_report_status CHECK (status IN ('RECEIVED','RESOLVED','DISMISSED')),
-    CONSTRAINT uk_report_once UNIQUE (reporter_member_id, target_type, target_id)
+    CONSTRAINT ck_report_status CHECK (status IN ('RECEIVED','RESOLVED','DISMISSED'))
 );
+-- 같은 회원이 같은 대상을 두 번 신고하지 못하게 한다. 삭제된 신고는 제외
+CREATE UNIQUE INDEX uk_report_once ON report (reporter_member_id, target_type, target_id)
+    WHERE deleted_at IS NULL;
 CREATE INDEX ix_report_status ON report (status, created_at);
+
+-- ===== 완전 삭제 대상 확인용 인덱스(§6-5 Q17 매일 스케줄) =====
+CREATE INDEX ix_member_deleted ON member (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX ix_rating_deleted ON rating (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX ix_review_deleted ON review (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX ix_build_deleted ON keyboard_build (deleted_at) WHERE deleted_at IS NOT NULL;
 ```
 
 - 신고 대상은 `target_type`과 `target_id`로 가리킨다. 대상 테이블에 외래키를 걸지 않는다(세 종류를 한 컬럼으로 묶기 위한 선택, 무결성은 서비스가 검사). 대상이 삭제되면 신고 행은 남아 관리자가 확인할 수 있게 한다.
 - 도움됨 수는 `review_vote`에서 세서 `review.helpful_count`를 갱신한다(같은 트랜잭션). 집계 캐시와 같은 방식이다.
+
+### 3-1. 결정 기록 (사용자, 2026-11-08, V9 대조 후속)
+
+- **질문 1 — `uk_review_switch_member`(스위치당 후기 1건, 부분 유니크):** 유지한다. 이 인덱스는 §6 Q2의 "스위치당 1건"을 DB가 보장하는 것이며, 위 DDL에는 없지만 이 결정으로 설계에 포함된다.
+- **질문 2 — 삭제 컬럼:** `review.deleted_at`은 유지한다(§6-4 소프트 딜리트). `report.deleted_at`은 쓰이지 않으므로 V10(`V10__drop_report_deleted_at.sql`)에서 제거한다. V9는 수정하지 않는다.
 
 ## 4. 기능별 설계 (질문 답에 따라 확정)
 
@@ -95,7 +134,7 @@ CREATE INDEX ix_report_status ON report (status, created_at);
 - 수정·삭제: 작성자 본인. 관리자 삭제 허용 여부는 §6 Q3.
 - 목록: 스위치 상세 하단, 20건씩, 정렬은 §6 Q6. 각 항목은 닉네임, 본문, 추천 대상, 도움됨 수, 등록 시각을 보인다.
 - 도움됨: 로그인 회원이 누르면 `review_vote`에 한 줄 추가, 다시 누르면 취소(토글). 본인 후기에는 누를 수 없다(§6 Q5).
-- 숨김 후기(신고 처리): 작성자와 관리자에게만 보인다(§6 Q12, Q13 결과에 따라).
+- 숨김 후기(신고 처리): **작성자에게만 보인다.** 관리자도 볼 수 없고 해제도 작성자만 가능하다(6-2 확정, 빌드와 같음).
 - 권한 검사는 서비스에서 한다.
 
 ### 4.2 내 컬렉션
@@ -105,7 +144,10 @@ CREATE INDEX ix_report_status ON report (status, created_at);
 - 스위치가 삭제되면 컬렉션 행도 함께 사라진다(외래키 `ON DELETE CASCADE`).
 
 ### 4.3 신고
-- 신고 버튼: 후기, 평가, 빌드(대상 목록은 §6 Q9)의 상세 또는 목록 항목에 둔다. 로그인 필요.
+- 신고 버튼: 후기, 평가, 빌드(§6 Q9)의 상세 또는 목록 항목에 둔다. 로그인 필요.
+- **숨김 후기·평가도 신고 대상에서 제외한다(사용자 확정, 숨김 빌드와 같은 기준).** 숨김 후기·평가는 작성자에게만 보이므로 다른 회원이 신고할 수 없다. 접수 시점에 대상이 숨김이면 거부하고 레코드를 만들지 않는다. 삭제된 대상도 같은 방식으로 거부한다.
+- **숨김 빌드는 신고 대상에서 제외한다(사용자 확정).** 숨김 빌드는 작성자 외에 상세가 404이므로 다른 회원이 찾아서 신고할 수 없다. Q9의 "빌드"는 공개 빌드만 뜻한다. 신고 접수 시점에 대상 빌드가 숨김이면 거부한다(화면에 버튼이 없고, 서버도 검사). 신고가 접수된 뒤 작성자가 빌드를 숨기면 기존 신고는 처리 화면에 대상 상태(숨김)로 남는다.
+- 본인의 대상은 신고할 수 없다(Q10).
 - 신고 폼: 사유(고정 선택지, §6 Q11) + 메모(선택).
 - 접수: `report` 행을 `RECEIVED`로 저장. 중복 신고 처리는 §6 Q10.
 - 관리자 목록 `/admin/reports`: 접수 순 정렬, 상태 필터(접수됨·처리됨·기각됨). 관리자 전용(`/admin/**` 규칙).
@@ -117,7 +159,7 @@ CREATE INDEX ix_report_status ON report (status, created_at);
 
 | 행동 | 누가 | 비고 |
 |---|---|---|
-| 후기 목록 보기 | 누구나 (숨김 제외) | 숨김 후기는 작성자와 관리자 |
+| 후기 목록 보기 | 누구나 (숨김·삭제 제외) | 숨김 후기는 작성자만 |
 | 후기 등록 | 로그인 회원 (Q1) | |
 | 후기 수정 | 작성자 | |
 | 후기 삭제 | 작성자 (관리자 Q3) | |
@@ -151,7 +193,7 @@ CREATE INDEX ix_report_status ON report (status, created_at);
 
 | # | 확정 |
 |---|---|
-| Q9 | 대상: **후기, 평가, 빌드** |
+| Q9 | 대상: **후기, 평가, 빌드**. 빌드는 **공개 빌드만** 신고 대상이다. 숨김 빌드는 신고 대상에서 제외(사용자 확정, 2026-11-08). **숨김 처리된 후기·평가도 신고 대상에서 제외**(숨김 빌드와 같은 기준, 사용자 확정 2026-11-08, 리뷰 권고 반영) |
 | Q10 | 자격: **로그인 회원 누구나, 본인 대상 불가**. 중복: **회원당 대상당 1회** |
 | Q11 | 사유: **고정 선택지 + 자유 메모** |
 | Q12 | 처리 결과: **숨김 / 기각** |

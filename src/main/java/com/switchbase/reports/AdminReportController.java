@@ -34,8 +34,12 @@ public class AdminReportController {
 
     @PostMapping("/admin/reports/{id}/hide")
     String hide(@PathVariable Long id, @AuthenticationPrincipal MemberUserDetails admin, RedirectAttributes redirect) {
-        reportService.resolve(id, admin.getId(), true);
-        redirect.addFlashAttribute("message", "숨김 처리했어요.");
+        try {
+            reportService.resolve(id, admin.getId(), true);
+            redirect.addFlashAttribute("message", "숨김 처리했어요.");
+        } catch (IllegalArgumentException e) {
+            redirect.addFlashAttribute("message", e.getMessage());
+        }
         return "redirect:/admin/reports";
     }
 

@@ -25,7 +25,8 @@
             <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</td>
             <td>
                 <a th:if="${r.targetHref}" th:href="${r.targetHref}" th:text="${r.targetLabel}">후기 #12</a>
-                <span th:unless="${r.targetHref}" class="muted">대상 없음</span>
+                <!-- targetState: '숨김' | '대상 없음' | '' (서버가 준다) -->
+                <span th:unless="${#strings.isEmpty(r.targetState)}" class="error" th:text="${r.targetState}">숨김</span>
             </td>
             <td th:text="${r.reasonLabel}">욕설·비방</td>
             <td th:text="${r.detail} ?: '-'">-</td>

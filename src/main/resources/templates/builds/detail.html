@@ -33,6 +33,11 @@
         </form>
     </div>
 
+    <!-- 신고: 로그인 회원, 본인 빌드 아님, 공개 빌드(숨김은 타인에게 404라 보이지 않음). 로그인 여부는 조각이 판단한다 -->
+    <p th:unless="${build.hidden or build.mine}">
+        <th:block th:replace="~{reports/button :: button('BUILD', ${build.id})}"></th:block>
+    </p>
+
     <p><a th:href="@{/builds}">목록으로</a></p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

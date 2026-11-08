@@ -46,7 +46,7 @@ public class BuildController {
     String detail(@PathVariable Long id,
                   @AuthenticationPrincipal MemberUserDetails viewer, Model model) {
         KeyboardBuild build = buildService.view(id, viewerId(viewer));
-        model.addAttribute("build", BuildView.from(build));
+        model.addAttribute("build", BuildView.from(build, viewerId(viewer)));
         return "builds/detail";
     }
 
