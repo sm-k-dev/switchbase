@@ -292,3 +292,83 @@ R1을 고치고 XML에서 통과를 확인하면 통과 처리한다. 문서 정
 ### 운영 메모 (수정 요청 아님)
 - **관리자 버튼 없음**: 화면이 없어서 관리자는 CSRF 토큰을 포함해 직접 호출해야 한다. 설계는 "폼 버튼 또는 curl"이라고 했지만 템플릿에는 버튼이 없다. 필요하면 관리자 페이지에 폼 버튼을 추가할 것.
 - **긴 트랜잭션**: `recomputeAll`은 모든 스위치를 한 트랜잭션에서 다시 계산하므로 잠금을 끝까지 쥔다. 그동안 그 스위치들에 대한 평가 저장이 기다린다. 지금 규모에서는 괜찮다. 데이터가 커지면 스위치 단위로 나눠 실행할 것.
+
+---
+
+## 후기·컬렉션·신고·탈퇴·보관 정리 리뷰 (review-collection-report §6-4·§6-5·§7, review-screens)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 15개 스위트 105개 전부 통과(합계 failures 0, errors 0, 16:23 실행, `ReviewCollectionReportTest` 11건 포함). 재실행 없이 XML과 소스, 문서로 판단.
+
+### 판정: 반려 (필수 3건, 권고 여러 건)
+
+### 기대값 변경 확인 (아키텍트 요청)
+- **도움됨 수 1 (`withdrawalAnonymizes…`)**: 맞다. 후기는 탈퇴한 회원의 것이고, 도움됨은 다른 회원(`fan`)이 누른 것이다. 탈퇴 시 지우는 것은 탈퇴한 회원 **본인의 투표**이고(설계 §6-4 "도움됨 표시"), 다른 회원의 투표는 남아 `helpful_count = 1`이 맞다. 다만 테스트 주석 "탈퇴한 회원의 도움됨 표시는 지워지고"는 "탈퇴한 회원이 누른 도움됨은 지워지고"로 고치는 편이 정확하다.
+- **탈퇴 후 표본 수 1 (`withdrawalAnonymizes…`, `retentionPurges…`)**: 맞다. §6-5 Q16은 "탈퇴 회원 평가는 30일 뒤 집계에서 제외, 즉시 제외가 아님"이다. `summaryOf`의 조건 `m.deletedAt is null or m.deletedAt > cutoff`가 이를 구현한다. 보관 기간 안이라 1, 30일 경과 후 purge 뒤에도 남은 한 명(active)만 세서 1이다.
+
+### 확인 통과
+- **이메일·해시 누출**: `Member.withdraw`가 이메일과 비밀번호 해시를 NULL로 바꾸고 닉네임을 `탈퇴회원<id>`로 바꾼다. 인증 토큰은 `deleteByMember`로 지운다. 재가입 차단은 이메일 해시만 `signup_block`에 두고, 원문은 저장하지 않는다. 탈퇴 뒤 이메일로 로그인할 수 없다(조회 대상 없음). 테스트 `withdrawalAnonymizesBlocksSignup…`.
+- **부분 유니크**: V9가 `rating`의 `NULLS NOT DISTINCT` 유니크를 `WHERE deleted_at IS NULL` 부분 인덱스로 바꿨고, 후기도 `(switch_id, member_id) WHERE deleted_at IS NULL`이다. 중복 확인도 `findFirst…DeletedAtIsNull`을 쓴다. 삭제 뒤 같은 조합 재등록은 테스트 `deletedRatingCanBeRecreated…`.
+- **신고 보존과 연결 끊기**: V9가 `report.reporter_member_id`를 `ON DELETE SET NULL`로 바꾸고, 탈퇴 때 `disconnectReporter`가 연결을 끊는다. 처리 기록과 대상 id는 남는다. 목록에서 신고자는 "탈퇴한 회원"으로 나온다. 중복 신고는 `existsBy…`와 DB 제약으로 막는다.
+- **집계 제외 세 조건**: `summaryOf`와 V9 채우기가 같은 세 조건을 쓴다(`deletedAt is null`, `hidden = false`, `m.deletedAt is null or > cutoff`). `RatingStatsService.recompute`도 `cutoff`를 넘긴다. 삭제(`softDelete`)·숨김·숨김 해제·신고 숨김 모두 같은 트랜잭션에서 재계산한다(테스트 `hiddenRatingFollowsSameVisibilityAndLeavesStats`).
+- **스케줄 작업 멱등성**: `RetentionService.purge`는 삭제 대상을 먼저 세고, 삭제는 `WHERE` 조건만 쓰므로 두 번째 실행은 0건이다. 영향 받은 스위치는 같은 트랜잭션에서 재계산한다(테스트 `retentionPurgesOnlyPastThirtyDaysAndIsIdempotent`). 04:30 cron 한 곳에서만 실행된다.
+- **숨김 조회·해제 작성자 전용**: 목록 쿼리 `(hidden = false or m.id = :viewer)`로 숨김 후기·평가는 작성자에게만 보인다. 해제(`unhide`)는 후기·평가 모두 작성자만 가능하고, 그 외는 404다. 관리자는 해제할 수 없다.
+- **공개 컬렉션 404**: `publicOf`는 대상이 탈퇴했거나 공개 설정이 꺼져 있으면 404다. 본인은 항상 볼 수 있다. 탈퇴 시 `collection_public`을 끈다.
+- **탈퇴 시 즉시 삭제 항목**: 컬렉션은 `deleteByMember`로 하드 삭제되고, 본인 도움됨 투표도 지운 뒤 그 후기의 `helpful_count`를 다시 센다.
+- **보안 설정**: `/me/**`와 쓰기 경로(후기·도움됨·숨김 해제·컬렉션 토글·신고)는 로그인 필요로 막혀 있다. `/admin/**`은 ADMIN만이다.
+
+### 필수 수정
+
+**R1. 탈퇴한 회원의 기존 세션이 계속 쓰기를 할 수 있다**
+- `WithdrawController`는 현재 요청의 세션만 로그아웃시킨다. 같은 회원의 다른 기기나 브라우저 세션은 `MemberUserDetails` 스냅샷을 그대로 들고 있어서, 탈퇴 뒤에도 평가 등록, 후기 작성, 컬렉션 토글, 신고가 기간 만료 전까지 통과한다. 어디에서도 `isWithdrawn()`을 요청마다 확인하지 않는다(코드 검색으로 확인).
+- 탈퇴 회원이 탈퇴 뒤에 새 콘텐츠를 만드는 것은 정책과 맞지 않는다(§6-4 "탈퇴" 범위).
+- 조치: 인증된 요청마다 회원의 `deleted_at`을 확인하고 탈퇴했으면 세션을 끊는 필터를 두거나, 탈퇴 때 그 회원의 세션을 전부 무효화한다(`SessionRegistry`). 테스트: 탈퇴 전에 연 두 번째 세션으로 평가·후기를 쓰면 거부(로그인 화면으로 보내거나 403).
+
+**R2. 도움됨 토글의 동시성과 중복 클릭**
+- `ReviewService.toggleHelpful`은 후기 행을 잠그지 않는다. 두 사람이 같은 후기에 동시에 누르면 각자 자기 투표를 넣은 뒤 `countByReviewId`를 세는데, 서로의 미커밋 투표가 보이지 않아 `helpful_count`가 틀릴 수 있다(예: 둘 다 1로 저장).
+- `Review`에 `@Version`이 있어서, 두 트랜잭션이 같은 후기를 고치면 나중 flush에서 `ObjectOptimisticLockingFailureException`이 나는데, `ReviewController.helpful`은 `IllegalArgumentException`만 잡으므로 **500**이 된다.
+- 같은 사람이 두 번 빠르게 누르면 `existsBy`가 둘 다 false를 보고 두 번째 `saveAndFlush`가 `review_vote` 기본키 위반으로 **500**이 된다.
+- 조치: 토글 시작에서 후기 행을 `PESSIMISTIC_WRITE`로 잠그고, 삽입 중복(`DataIntegrityViolationException`)은 "이미 누름"으로 보고 결과를 맞추고, 카운트는 잠금 안에서 다시 센다. 테스트: 같은 사람 중복 토글과 두 사람 동시 토글.
+
+**R3. 컬렉션 토글의 중복 클릭에서 500**
+- `CollectionService.toggle`이 `existsBy`로 확인한 뒤 `saveAndFlush`한다. 같은 (회원, 스위치, 상태)를 두 번 빠르게 누르면 기본키 위반이 나는데, `CollectionController.toggle`은 이를 잡지 않아 **500**이 된다.
+- 조치: 삽입 충돌을 "이미 켜짐"으로 처리하거나, 잠금을 쓰거나, 한 번의 SQL로 토글한다. 테스트: 두 번 연속 요청(중복 클릭 재현).
+
+### 권고 (수정 요청 아님, 확인 사항)
+- **탈퇴 회원 이름 표기가 두 가지다**: 후기와 편집 기록은 "탈퇴한 회원", 평가 목록(`RatingView.authorNickname`)과 빌드는 `탈퇴회원<id>`다. 닉네임에 회원 id가 들어가 순번이 노출된다. 표기를 "탈퇴한 회원"으로 통일하는 것을 권한다.
+- **재가입 차단 해시**: `signup_block`은 솔트 없는 SHA-256 해시다. DB가 유출되면 후보 이메일을 대입해 "탈퇴한 이메일인지"를 알아낼 수 있다. 서버 비밀값으로 만든 HMAC으로 바꾸는 것을 권한다(설계는 해시로 확정했으므로 판단은 아키텍트에게).
+- **숨김 후기에 도움됨**: `toggleHelpful`은 숨김 후기에 다른 회원이 누르는 것을 막지 않는다. 내용은 보이지 않지만 카운트가 바뀐다. 숨김 후기에 대한 도움됨은 막는 것이 일관적이다.
+- **신고 대상 존재 노출**: `ReportService.resolve`는 숨김 후기·평가도 찾는다. 다른 회원이 임의의 id로 신고 화면을 열어 존재를 확인할 수 있다. 영향은 작다.
+- **목록과 집계의 하루 차이**: 탈퇴 30일이 지나면 집계는 바로 빠지지만 목록은 04:30 purge 때까지 남는다. 설계상 허용 범위다.
+- **도움됨 목록 N+1**: `ReviewService.view`가 후기마다 `existsByReviewIdAndMemberId`를 호출한다. 목록 20건이면 쿼리 20개다. 한 번에 묶는 것을 권한다.
+- **테스트 주석**: `withdrawalAnonymizes…`의 도움됨 주석 문구를 맞출 것(위 기대값 확인 참조).
+
+### 재리뷰 조건
+R1·R2·R3을 고치고, 새 테스트(세션 차단, 중복 토글, 동시 토글)를 포함해 XML에서 전부 통과를 확인하면 통과 처리한다.
+
+---
+
+## 후기·컬렉션·신고·탈퇴 반려 수정 재리뷰 (R1·R2·R3)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 15개 스위트 108개 전부 통과(합계 failures 0, errors 0, 16:34 실행, `ReviewCollectionReportTest` 14건 중 신규 3건 확인). 재실행 없이 XML과 소스로 판단.
+
+### 판정: 통과
+
+### R1 탈퇴 회원의 기존 세션 (확인)
+- `MemberStatusFilter`(`OncePerRequestFilter`)가 `AuthorizationFilter` 앞에 등록됐다. 인증된 요청마다 `members.findById`로 회원을 다시 읽고, 탈퇴(`isWithdrawn`)면 세션을 무효화하고 컨텍스트를 비운 뒤 `/login`으로 보낸다. 필터가 체인 안에 있으므로 쓰기 요청도 이 확인을 거치고, 체인에서 빠지지 않는다.
+- 필터는 빈으로 등록하지 않아 서블릿에 두 번 올라가지 않는다. 익명 요청은 건너뛴다.
+- 테스트 `withdrawnMemberSessionIsRejectedOnNextRequest`가 통과.
+- 비용(메모): 인증된 요청마다 회원 한 건을 읽는다. 지금 규모에서는 괜찮다.
+
+### R2 도움됨 토글 (확인)
+- `toggleHelpful`이 `findForUpdate`(후기 행 `PESSIMISTIC_WRITE`)로 잠근 뒤에만 투표를 바꾼다. 같은 후기의 토글은 한 줄로 선다. 잠금을 쥔 쪽은 앞선 토글이 커밋한 투표를 본다.
+- 추가는 `INSERT … ON CONFLICT DO NOTHING`이라 중복 클릭에도 기본키 위반이 나지 않는다. 삭제는 있을 때만 지운다.
+- `helpful_count`는 잠금 안에서 투표 행 수로 다시 센다. 같은 행에 대한 쓰기가 직렬화되므로 `@Version` 충돌도 생기지 않는다.
+- 테스트 `concurrentHelpfulTogglesKeepCountEqualToVoteRows`(카운트 = 투표 행 수)와 `helpfulToggleCountsAndOwnReviewCannotVote` 통과.
+
+### R3 컬렉션 중복 클릭 (확인)
+- 추가는 `insertIgnore`(ON CONFLICT DO NOTHING)이므로 같은 상태를 두 번 눌러도 500이 나지 않는다. 삭제는 행이 없어도 무해하다.
+- 테스트 `repeatedCollectionPressesNeverFail` 통과.
+
+### 메모 (수정 요청 아님)
+- 중복 클릭 때 `toggle`은 두 번째 호출에서도 `true`를 돌려주므로 "넣었어요" 메시지가 나온다. 상태는 맞다. 화면 문구를 정밀하게 하고 싶으면 삽입 행 수(`insertIgnore` 반환값 0)를 써서 "이미 있어요"로 바꿀 수 있다. 필수는 아니다.
+- R1의 필터는 탈퇴 여부를 요청마다 DB에서 확인하므로, 탈퇴 직후 다른 세션의 첫 요청에서 막힌다.
