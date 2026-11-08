@@ -41,22 +41,26 @@ public class RatingService {
     private final KeyboardBuildRepository builds;
     private final MemberRepository members;
     private final ModTagWriter tagWriter;
+    private final RatingStatsService stats;
 
     public RatingService(RatingRepository ratings, ModTagRepository tags, KeyboardSwitchRepository switches,
-                         KeyboardBuildRepository builds, MemberRepository members, ModTagWriter tagWriter) {
+                         KeyboardBuildRepository builds, MemberRepository members, ModTagWriter tagWriter,
+                         RatingStatsService stats) {
         this.ratings = ratings;
         this.tags = tags;
         this.switches = switches;
         this.builds = builds;
         this.members = members;
         this.tagWriter = tagWriter;
+        this.stats = stats;
     }
 
     // ---- 조회 (누구나) ----
 
+    /** 요약은 집계 행에서 읽는다(stats-design §5-1). */
     public RatingSummary summary(Long switchId) {
         requireSwitch(switchId);
-        return ratings.summaryOf(switchId);
+        return stats.current(switchId);
     }
 
     public Page<RatingView> list(Long switchId, Long viewerId, boolean viewerAdmin, Pageable pageable) {
@@ -115,7 +119,9 @@ public class RatingService {
         if (ratings.findByKeyboardSwitchIdAndMemberIdAndBuildId(switchId, memberId, buildIdOf(build)).isPresent()) {
             throw new RatingDuplicateException();
         }
-        return saveRating(new Rating(sw, member, build, in, resolveTags(in.tags())));
+        Rating saved = saveRating(new Rating(sw, member, build, in, resolveTags(in.tags())));
+        stats.recompute(switchId);
+        return saved;
     }
 
     /** 수정. 작성자만(아니면 403). 옛 version이면 충돌. 조합이 바뀌면 중복을 다시 본다. */
@@ -137,7 +143,9 @@ public class RatingService {
             }
         }
         r.apply(build, in, resolveTags(in.tags()));
-        return saveRating(r);
+        Rating saved = saveRating(r);
+        stats.recompute(saved.getKeyboardSwitch().getId());
+        return saved;
     }
 
     /** 삭제. 작성자 또는 관리자만(아니면 403). 삭제된 평가가 속한 스위치 id를 돌려준다. */
@@ -149,6 +157,8 @@ public class RatingService {
         }
         Long switchId = r.getKeyboardSwitch().getId();
         ratings.delete(r);
+        ratings.flush();
+        stats.recompute(switchId);
         return switchId;
     }
 
