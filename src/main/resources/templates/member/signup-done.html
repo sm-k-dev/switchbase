@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('인증 메일 발송')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="auth">
+    <h1>인증 메일을 보냈어요</h1>
+
+    <p class="alert alert-info" role="status">
+        <th:block th:if="${email != null}"><strong th:text="${email}">example@example.com</strong>으로 </th:block>
+        인증 메일을 보냈습니다. 메일함(스팸함 포함)에서 링크를 눌러 인증을 완료해 주세요.
+    </p>
+
+    <p class="field-hint">링크는 24시간 동안 유효하며 한 번만 사용할 수 있어요.</p>
+
+    <p class="auth-links">
+        인증을 마치셨다면 <a th:href="@{/login}">로그인</a>하세요.
+    </p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -8,10 +8,13 @@ spring:
   docker:
     compose:
       lifecycle-management: start-only   # 앱을 꺼도 DB는 계속 켜둠 (재시작이 빨라짐)
-  switchbase:
-    admin:
-      username: ${ADMIN_USERNAME:admin}
-      password: ${ADMIN_PASSWORD:admin1234}
+
+switchbase:
+  base-url: ${BASE_URL:http://localhost:8090}
+  admin:
+    email: ${ADMIN_EMAIL:admin@switchbase.local}
+    nickname: ${ADMIN_NICKNAME:admin}
+    password: ${ADMIN_PASSWORD:}      # 기본값 없음. 비어 있으면 관리자 생성을 건너뛰고 WARN 로그
 
 server:
   port: 8090

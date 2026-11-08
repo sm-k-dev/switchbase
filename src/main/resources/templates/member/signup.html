@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('회원가입')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="auth">
+    <h1>회원가입</h1>
+
+    <form class="auth-form" th:object="${signupForm}" th:action="@{/signup}" method="post" novalidate>
+        <p class="alert alert-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" role="alert"></p>
+
+        <label>이메일
+            <input type="email" th:field="*{email}" maxlength="255" autocomplete="email" autofocus
+                   th:attr="aria-invalid=${#fields.hasErrors('email')}">
+            <span class="field-hint">가입 후 이 주소로 인증 메일을 보내드려요.</span>
+            <span class="error" th:errors="*{email}"></span>
+        </label>
+
+        <label>닉네임
+            <input type="text" th:field="*{nickname}" maxlength="20" autocomplete="nickname"
+                   th:attr="aria-invalid=${#fields.hasErrors('nickname')}">
+            <span class="field-hint">2~20자. 화면에 보이는 이름이에요.</span>
+            <span class="error" th:errors="*{nickname}"></span>
+        </label>
+
+        <!-- 비밀번호는 값을 다시 채우지 않는다(th:field 사용 안 함) -->
+        <label>비밀번호
+            <input type="password" name="password" autocomplete="new-password"
+                   th:attr="aria-invalid=${#fields.hasErrors('password')}">
+            <span class="field-hint">8자 이상이어야 해요. 한글은 약 24자, 영문·숫자는 72자까지 가능합니다.</span>
+            <span class="error" th:errors="*{password}"></span>
+        </label>
+
+        <label>비밀번호 확인
+            <input type="password" name="passwordConfirm" autocomplete="new-password"
+                   th:attr="aria-invalid=${#fields.hasErrors('passwordConfirm')}">
+            <span class="error" th:errors="*{passwordConfirm}"></span>
+        </label>
+
+        <button type="submit">가입하기</button>
+    </form>
+
+    <p class="auth-links">
+        이미 회원이신가요? <a th:href="@{/login}">로그인</a>
+    </p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

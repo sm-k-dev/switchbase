@@ -16,3 +16,25 @@ body { max-width: 960px; margin: 0 auto; padding: 0 16px; font-family: system-ui
 .switch-form label { display: grid; gap: 4px; }
 .notice { color: #1e7e34; margin: 0; }
 .me { color: #555; }
+/* member: 로그인·가입·인증 화면 */
+.auth { display: grid; gap: 16px; max-width: 400px; margin: 32px auto; }
+.auth h1 { margin: 0; font-size: 1.5rem; }
+.auth-form { display: grid; gap: 12px; }
+.auth-form label { display: grid; gap: 4px; font-weight: 500; }
+.auth-form input { font: inherit; padding: 8px 10px; border: 1px solid #bbb; border-radius: 4px; }
+.auth-form input:focus { outline: 2px solid #3b6ea8; outline-offset: 1px; }
+.auth-form input[aria-invalid=true] { border-color: #c0392b; }
+.auth-form button, .auth .button { font: inherit; padding: 10px 14px; border: 0; border-radius: 4px; background: #222; color: #fff; cursor: pointer; text-align: center; text-decoration: none; }
+.auth .button { display: inline-block; }
+.field-hint { margin: 0; color: #666; font-size: 13px; font-weight: 400; }
+.alert { margin: 0; padding: 10px 12px; border-radius: 4px; }
+.alert-error { background: #fdecea; color: #a93226; }
+.alert-warn { background: #fff4e0; color: #7a4d00; }
+.alert-info { background: #eef4fb; color: #22466b; }
+.auth-links { font-size: 14px; color: #555; margin: 0; }
+.resend-box { border-top: 1px solid #ddd; padding-top: 16px; display: grid; gap: 12px; }
+.resend-box h2 { margin: 0; font-size: 1rem; }
+@media (max-width: 480px) {
+    .auth { margin: 20px auto; }
+    .site-header { flex-wrap: wrap; gap: 8px; }
+}

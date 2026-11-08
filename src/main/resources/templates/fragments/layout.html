@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="|${title} - SwitchBase|">SwitchBase</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"
+            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+            crossorigin="anonymous" defer></script>
 </head>
 <body>
 <header th:fragment="header" class="site-header">
@@ -17,7 +19,7 @@
             <a th:href="@{/admin/switches/import}">CSV</a>
         </th:block>
         <th:block sec:authorize="isAuthenticated()">
-            <span class="me" sec:authentication="name">닉네임</span>
+            <span class="me" th:text="${#authentication.principal instanceof T(com.switchbase.member.MemberUserDetails) ? #authentication.principal.nickname : #authentication.name}">닉네임</span>
             <form th:action="@{/logout}" method="post" class="inline">
                 <button type="submit">로그아웃</button>
             </form>

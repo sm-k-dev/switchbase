@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('로그인')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="auth">
+    <h1>로그인</h1>
+
+    <p class="alert alert-info" th:if="${param.logout != null}" role="status">로그아웃되었습니다.</p>
+    <p class="alert alert-error" th:if="${param.error != null}" role="alert">이메일 또는 비밀번호가 올바르지 않습니다.</p>
+    <p class="alert alert-warn" th:if="${param.unverified != null}" role="alert">이메일 인증이 완료되지 않았습니다. 가입 시 받은 인증 메일의 링크를 눌러 주세요.</p>
+
+    <form class="auth-form" th:action="@{/login}" method="post">
+        <label>이메일
+            <input type="email" name="email" required maxlength="255"
+                   autocomplete="username" autofocus>
+        </label>
+        <label>비밀번호
+            <input type="password" name="password" required
+                   autocomplete="current-password">
+        </label>
+        <button type="submit">로그인</button>
+    </form>
+
+    <p class="auth-links">
+        아직 회원이 아니신가요? <a th:href="@{/signup}">회원가입</a>
+    </p>
+
+    <!-- 미인증 안내일 때만: 인증 메일 재발송 -->
+    <section class="resend-box" th:if="${param.unverified != null}">
+        <h2>인증 메일을 받지 못하셨나요?</h2>
+        <form class="auth-form" th:action="@{/signup/resend}" method="post">
+            <label>가입한 이메일
+                <input type="email" name="email" required maxlength="255" autocomplete="email">
+            </label>
+            <button type="submit">인증 메일 다시 받기</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
