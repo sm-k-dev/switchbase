@@ -18,6 +18,7 @@ public class MemberUserDetails implements UserDetails, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private final Long id;
     private final String email;
     private final String passwordHash;
     private final String nickname;
@@ -25,6 +26,7 @@ public class MemberUserDetails implements UserDetails, Serializable {
     private final boolean emailVerified;
 
     public MemberUserDetails(Member member) {
+        this.id = member.getId();
         this.email = member.getEmail();
         this.passwordHash = member.getPasswordHash();
         this.nickname = member.getNickname();
@@ -42,6 +44,8 @@ public class MemberUserDetails implements UserDetails, Serializable {
     public List<GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
+
+    public Long getId() { return id; }
 
     public String getNickname() { return nickname; }
 

@@ -36,7 +36,7 @@ public class SwitchCsvImporter {
     public record Result(int created, int skipped, List<String> errors) {
     }
 
-    public Result importCsv(InputStream in, String editor) throws IOException {
+    public Result importCsv(InputStream in, Long editorMemberId, String editorNickname) throws IOException {
         int created = 0;
         int skipped = 0;
         List<String> errors = new ArrayList<>();
@@ -61,7 +61,8 @@ public class SwitchCsvImporter {
                         skipped++;
                         continue;
                     }
-                    switchService.create(form.toSpec(), form.aliasList(), form.getEditSummary(), editor, form.getSourceUrl());
+                    switchService.create(form.toSpec(), form.aliasList(), form.getEditSummary(),
+                            editorMemberId, editorNickname, form.getSourceUrl());
                     created++;
                 } catch (NumberFormatException e) {
                     errors.add(lineNo + "번째 줄: 숫자 칸에 숫자가 아닌 값이 있어요");

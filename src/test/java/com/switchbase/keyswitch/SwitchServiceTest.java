@@ -31,7 +31,7 @@ class SwitchServiceTest {
 
     @Test
     void createWritesFirstRevision() {
-        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", "tester", null);
+        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", null, "tester", null);
 
         assertThat(switchService.revisionsOf(sw.getId()))
                 .extracting(SwitchRevision::getRevisionNo)
@@ -40,10 +40,10 @@ class SwitchServiceTest {
 
     @Test
     void updateKeepsOldSpecInHistory() {
-        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", "tester", null);
+        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", null, "tester", null);
         em.flush();
 
-        switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "55"), List.of(), "입력압 수정", "tester",
+        switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "55"), List.of(), "입력압 수정", null, "tester",
                 "https://example.com/spec");
         em.flush();
 
@@ -58,21 +58,21 @@ class SwitchServiceTest {
 
     @Test
     void staleVersionIsRejected() {
-        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", "tester", null);
+        KeyboardSwitch sw = switchService.create(spec("Yellow", SwitchType.LINEAR, "50"), List.of(), "처음 등록", null, "tester", null);
         em.flush();
-        switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "55"), List.of(), "먼저 고침", "a", null);
+        switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "55"), List.of(), "먼저 고침", null, "a", null);
         em.flush();  // 여기서 version이 1이 된다
 
         assertThatThrownBy(() ->
-                switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "60"), List.of(), "늦게 고침", "b", null))
+                switchService.update(sw.getId(), 0L, spec("Yellow", SwitchType.LINEAR, "60"), List.of(), "늦게 고침", null, "b", null))
                 .isInstanceOf(OptimisticLockingFailureException.class);
     }
 
     @Test
     void searchFiltersByTypeAndForce() {
-        switchService.create(spec("Light Linear", SwitchType.LINEAR, "35"), List.of(), "등록", "tester", null);
-        switchService.create(spec("Heavy Linear", SwitchType.LINEAR, "67"), List.of(), "등록", "tester", null);
-        switchService.create(spec("Heavy Tactile", SwitchType.TACTILE, "67"), List.of(), "등록", "tester", null);
+        switchService.create(spec("Light Linear", SwitchType.LINEAR, "35"), List.of(), "등록", null, "tester", null);
+        switchService.create(spec("Heavy Linear", SwitchType.LINEAR, "67"), List.of(), "등록", null, "tester", null);
+        switchService.create(spec("Heavy Tactile", SwitchType.TACTILE, "67"), List.of(), "등록", null, "tester", null);
 
         Page<KeyboardSwitch> result = switchService.search(
                 new SwitchSearch("test", SwitchType.LINEAR, new BigDecimal("60"), null), PageRequest.of(0, 20));
@@ -85,7 +85,7 @@ class SwitchServiceTest {
     @Test
     void searchFindsSwitchByAliasIgnoringSpaces() {
         switchService.create(spec("Silent Test White", SwitchType.LINEAR, "45"),
-                List.of("저월백", "저소음 월백", "저 월백"), "등록", "tester", null);
+                List.of("저월백", "저소음 월백", "저 월백"), "등록", null, "tester", null);
         em.flush();
 
         assertThat(searchNames("저 월백")).containsExactly("Silent Test White");
@@ -99,7 +99,7 @@ class SwitchServiceTest {
     void koreanManufacturerNameIsSavedAsOfficialName() {
         KeyboardSwitch sw = switchService.create(
                 new SwitchSpec("게이트론", null, "Test Yellow", null, SwitchType.LINEAR, null, null, null, null, null, null),
-                List.of(), "등록", "tester", null);
+                List.of(), "등록", null, "tester", null);
         em.flush();
 
         assertThat(sw.getSpec().manufacturer()).isEqualTo("Gateron");
@@ -109,8 +109,8 @@ class SwitchServiceTest {
 
     @Test
     void sameNameWithDifferentVariantsCanCoexist() {
-        switchService.create(variantSpec("Y3", "45g", "45"), List.of(), "등록", "tester", null);
-        switchService.create(variantSpec("Y3", "55g", "55"), List.of(), "등록", "tester", null);
+        switchService.create(variantSpec("Y3", "45g", "45"), List.of(), "등록", null, "tester", null);
+        switchService.create(variantSpec("Y3", "55g", "55"), List.of(), "등록", null, "tester", null);
         em.flush();
 
         assertThat(switchService.exists("Test Co", "Y3", "45g")).isTrue();
@@ -120,7 +120,7 @@ class SwitchServiceTest {
 
         // 제조사 + 이름 + 변형이 모두 같으면 DB가 막는다
         assertThatThrownBy(() ->
-                switchService.create(variantSpec("Y3", "45g", "45"), List.of(), "등록", "tester", null))
+                switchService.create(variantSpec("Y3", "45g", "45"), List.of(), "등록", null, "tester", null))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 

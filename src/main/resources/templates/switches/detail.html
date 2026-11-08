@@ -8,7 +8,8 @@
     <h1 th:text="${s.variant} ? |${s.modelName} (${s.variant})| : ${s.modelName}">Yellow</h1>
     <p class="muted" th:unless="${aliases.empty}"
        th:text="|다른 이름: ${#strings.listJoin(aliases.![alias], ', ')}|">다른 이름: 저월백</p>
-    <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/switches/{id}/edit(id=${sw.id})}">수정</a>
+    <p th:if="${message}" class="notice" th:text="${message}"></p>
+    <a sec:authorize="isAuthenticated()" th:href="@{/switches/{id}/edit(id=${sw.id})}">수정</a>
 
     <table class="spec-table">
         <tr th:if="${s.brand}"><th>브랜드</th><td th:text="${s.brand}"></td></tr>
@@ -31,12 +32,12 @@
     </ul>
     <p th:if="${sources.empty}" class="muted">아직 출처가 없어요.</p>
 
-    <h2>수정 이력</h2>
+    <h2>수정 이력 <a th:href="@{/switches/{id}/history(id=${sw.id})}" class="muted">전체 보기</a></h2>
     <ol class="revisions">
         <li th:each="r : ${revisions}">
             <strong th:text="|#${r.revisionNo}|">#1</strong>
             <span th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-            <span th:text="${r.editor}">admin</span>
+            <span th:text="${r.editorDisplay}">admin</span>
             <span th:text="${r.editSummary}">처음 등록</span>
         </li>
     </ol>

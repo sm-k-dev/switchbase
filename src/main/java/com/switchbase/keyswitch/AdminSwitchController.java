@@ -1,7 +1,9 @@
 package com.switchbase.keyswitch;
 
+import com.switchbase.member.MemberUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.security.Principal;
 
 @Controller
 @RequestMapping("/admin/switches")
@@ -41,7 +42,8 @@ class AdminSwitchController {
     }
 
     @PostMapping
-    String create(@Valid @ModelAttribute("form") SwitchForm form, BindingResult binding, Principal principal) {
+    String create(@Valid @ModelAttribute("form") SwitchForm form, BindingResult binding,
+                  @AuthenticationPrincipal MemberUserDetails editor) {
         if (!binding.hasErrors() && switchService.exists(form.getManufacturer().strip(), form.getModelName().strip(), form.getVariant())) {
             binding.rejectValue("modelName", "duplicate", "이미 등록된 스위치예요");
         }
@@ -49,7 +51,8 @@ class AdminSwitchController {
             return "admin/switch-form";
         }
         KeyboardSwitch saved = switchService.create(
-                form.toSpec(), form.aliasList(), form.getEditSummary(), principal.getName(), form.getSourceUrl());
+                form.toSpec(), form.aliasList(), form.getEditSummary(),
+                editor.getId(), editor.getNickname(), form.getSourceUrl());
         return "redirect:/switches/" + saved.getId();
     }
 
@@ -63,14 +66,14 @@ class AdminSwitchController {
     @PostMapping("/{id}")
     String update(@PathVariable Long id,
                   @Valid @ModelAttribute("form") SwitchForm form, BindingResult binding,
-                  Principal principal, Model model) {
+                  @AuthenticationPrincipal MemberUserDetails editor, Model model) {
         if (binding.hasErrors()) {
             model.addAttribute("switchId", id);
             return "admin/switch-form";
         }
         try {
             switchService.update(id, form.getVersion(), form.toSpec(), form.aliasList(),
-                    form.getEditSummary(), principal.getName(), form.getSourceUrl());
+                    form.getEditSummary(), editor.getId(), editor.getNickname(), form.getSourceUrl());
         } catch (OptimisticLockingFailureException e) {
             binding.reject("conflict", "그 사이 다른 사람이 먼저 고쳤어요. 새로고침 후 다시 해 주세요.");
             model.addAttribute("switchId", id);
@@ -85,9 +88,9 @@ class AdminSwitchController {
     }
 
     @PostMapping("/import")
-    String importCsv(@RequestParam("file") MultipartFile file, Principal principal,
+    String importCsv(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal MemberUserDetails editor,
                      RedirectAttributes redirect) throws IOException {
-        SwitchCsvImporter.Result result = csvImporter.importCsv(file.getInputStream(), principal.getName());
+        SwitchCsvImporter.Result result = csvImporter.importCsv(file.getInputStream(), editor.getId(), editor.getNickname());
         redirect.addFlashAttribute("result", result);
         return "redirect:/admin/switches/import";
     }

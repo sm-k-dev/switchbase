@@ -76,9 +76,9 @@ public class SwitchService {
 
     @Transactional
     public KeyboardSwitch create(SwitchSpec spec, List<String> aliasNames,
-                                 String editSummary, String editor, String sourceUrl) {
+                                 String editSummary, Long editorMemberId, String editorNickname, String sourceUrl) {
         KeyboardSwitch saved = switches.save(new KeyboardSwitch(canonical(spec)));
-        revisions.save(new SwitchRevision(saved, 1, editSummary, editor));
+        revisions.save(new SwitchRevision(saved, 1, editSummary, editorMemberId, editorNickname));
         replaceAliases(saved, aliasNames);
         addSource(saved, sourceUrl);
         return saved;
@@ -86,14 +86,14 @@ public class SwitchService {
 
     @Transactional
     public KeyboardSwitch update(Long id, Long expectedVersion, SwitchSpec spec, List<String> aliasNames,
-                                 String editSummary, String editor, String sourceUrl) {
+                                 String editSummary, Long editorMemberId, String editorNickname, String sourceUrl) {
         KeyboardSwitch target = get(id);
         if (expectedVersion == null || target.getVersion() != expectedVersion) {
             throw new OptimisticLockingFailureException("다른 사람이 먼저 수정했습니다: " + id);
         }
         target.changeSpec(canonical(spec));
         int next = revisions.countByKeyboardSwitchId(id) + 1;
-        revisions.save(new SwitchRevision(target, next, editSummary, editor));
+        revisions.save(new SwitchRevision(target, next, editSummary, editorMemberId, editorNickname));
         replaceAliases(target, aliasNames);
         addSource(target, sourceUrl);
         return target;
