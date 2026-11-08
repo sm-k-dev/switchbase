@@ -262,3 +262,33 @@ R1을 고치고 XML에서 통과를 확인하면 통과 처리한다. 문서 정
 ### 재리뷰 후속 확인 (체감 평가)
 - `ratings/section.html` 9행에 `평가 N명 · M건`(sampleCount·ratingCount)이 반영되어 있음을 확인. 권고 항목 해소.
 - 주석 404 3곳(`RatingService` 29·121행, `RatingController` 75행)은 아직 404로 남아 있음. 동작은 403이 맞으므로 주석만 고치면 됨. 개발자 반영 후 주석 확인 예정(통과 판정에는 영향 없음).
+
+---
+
+## 집계 캐시 리뷰 (stats-design §3·§5·§5-1·§7)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 14개 스위트 94개 전부 통과(합계 failures 0, errors 0, 15:01 실행, `RatingStatsTest` 7건 포함). 재실행 없이 XML과 소스, 문서로 판단.
+
+### 판정: 통과 (운영 메모 2건)
+
+### (1) 같은 트랜잭션 갱신과 동시 저장
+- 호출 위치 3곳 모두 확인: `create`(저장 후 `recompute`), `update`(저장 후 `recompute`), `delete`(`delete` → `flush` → `recompute`). 셋 다 `RatingService`의 `@Transactional` 메서드 안이다. `RatingStatsService.recompute`는 기본 전파(REQUIRED)라 같은 트랜잭션에 합류하므로 평가 저장과 함께 커밋·롤백된다.
+- 동시 저장: 각 쓰기는 "평가 쓰기 → 집계 행 잠금(`PESSIMISTIC_WRITE`) → 같은 트랜잭션에서 `summaryOf` 재계산" 순서다. 잠금을 쥔 쓰기는 자기 변경 전과 다른 쓰기 커밋분을 모두 본다. 마지막으로 잠금을 쥔 쓰기가 가장 나중에 재계산하므로 최종 행은 전체 집계와 같아진다. 테스트 `concurrentSavesBothAreReflectedInTheRow`.
+- 데드락: 쓰기 트랜잭션은 집계 행 잠금을 하나만 잡고, 그 뒤 다른 집계 잠금을 기다리지 않는다. 평가 INSERT의 외래 키 공유 잠금(키 스위치·빌드·회원·태그 행)은 `UPDATE keyboard_switch`(NO KEY UPDATE)나 `UPDATE keyboard_build`(잠금 FOR UPDATE)와 대기 고리를 만들지 않는다. 확인한 범위에서 순환 대기는 찾지 못했다.
+
+### (2) 행 없음과 요약 규칙
+- `recompute`는 `ensureRow`(`INSERT … ON CONFLICT DO NOTHING`)로 행을 먼저 만들고, 그 뒤 `findForUpdate`로 잠근다. 동시에 만들어도 충돌은 무시되고, 잠금 뒤에는 커밋된 행을 본다. 행이 여전히 없으면 `IllegalStateException`인데, 정상 경로에서는 일어날 수 없다.
+- 요약 읽기 `current`: 행이 없으면 평균 null, 건수 0. 행이 있는데 평가가 모두 삭제되면 `replace`가 평균을 null, 건수를 0으로 쓴다. 테스트 `switchWithoutRowShowsEmptySummary`, `lastRatingDeletedLeavesNullAveragesAndZeroCounts`.
+
+### (3) V8 채우기
+- `INSERT … SELECT`는 스위치별 `AVG(sound/fatigue/star)`, `COUNT(DISTINCT member_id)`, `COUNT(*)`를 낸다. `summaryOf`와 같은 식이다(평균은 평가 건 기준, 표본 수는 서로 다른 회원 수, 건수는 행 수).
+- 평가가 없는 스위치는 행을 만들지 않는다. 읽는 쪽이 행 없음을 0과 null로 처리하므로 결과가 같다.
+- NUMERIC(4,2)에 1~5 평균을 담으므로 자릿수는 충분하다. 실데이터 검증은 하지 않았다(요청대로).
+
+### (4) 재계산 명령
+- `POST /admin/stats/recompute`는 `SecurityConfig`의 `/admin/**` 규칙(ADMIN만)으로 막힌다. 비로그인은 로그인 화면, 회원은 403. 테스트 `recomputeIsAdminOnly`.
+- CSRF: Spring Security 기본 CSRF가 켜져 있어 토큰 없는 POST는 거부된다. 테스트는 `csrf()`를 붙여 통과한다.
+
+### 운영 메모 (수정 요청 아님)
+- **관리자 버튼 없음**: 화면이 없어서 관리자는 CSRF 토큰을 포함해 직접 호출해야 한다. 설계는 "폼 버튼 또는 curl"이라고 했지만 템플릿에는 버튼이 없다. 필요하면 관리자 페이지에 폼 버튼을 추가할 것.
+- **긴 트랜잭션**: `recomputeAll`은 모든 스위치를 한 트랜잭션에서 다시 계산하므로 잠금을 끝까지 쥔다. 그동안 그 스위치들에 대한 평가 저장이 기다린다. 지금 규모에서는 괜찮다. 데이터가 커지면 스위치 단위로 나눠 실행할 것.
