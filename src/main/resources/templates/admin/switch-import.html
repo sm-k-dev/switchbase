@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('CSV 등록')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
@@ -18,6 +18,16 @@
         <button type="submit">올리기</button>
     </form>
     <p class="muted">첫 줄은 제목 줄이고, UTF-8로 저장한 파일이어야 해요.</p>
+
+    <section sec:authorize="hasRole('ADMIN')">
+        <h2>집계 다시 계산</h2>
+        <p th:if="${message}" class="notice" th:text="${message}"></p>
+        <p class="muted">평균과 평가 수를 평가 목록에서 처음부터 다시 계산해요. 어긋났을 때만 누르세요.</p>
+        <form th:action="@{/admin/stats/recompute}" method="post"
+              onsubmit="return confirm('모든 스위치의 집계를 다시 계산할까요?');">
+            <button type="submit">집계 다시 계산</button>
+        </form>
+    </section>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
