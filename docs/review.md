@@ -102,3 +102,63 @@
 ### 메모 (수정 요청 아님)
 - 충돌 뒤 다시 그린 폼은 옛 `version`을 그대로 담는다. 문구("새로고침 후 다시 해 주세요")대로 새로고침해야 저장된다. 입력한 내용은 살아 있으므로 UX는 허용 범위다. 원하면 서버가 최신 version을 넣고 사용자가 내용만 확인하게 하는 방법도 있다(설계 판단).
 - `revertDenied` 핸들러는 이제 NOT_ALLOWED만 받는다. 나머지 케이스가 늘어나면 핸들러의 상태 매핑을 다시 확인할 것.
+
+---
+
+## 빌드 등록 리뷰 (build-design §4·§8, build-screens)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 12개 스위트 69개 전부 통과(failures·errors·skipped 0, 13:27 실행). 재실행 없이 XML과 소스로 판단.
+
+### 판정: 반려 (필수 2건)
+
+### 확인 통과
+- (1) 20개 제한: `create`가 `lockMember(memberId)`(PESSIMISTIC_WRITE)로 회원 행을 잠근 뒤 `countByMemberId`로 센다. 이 개수는 숨김 포함이다. 같은 회원의 등록은 직렬화된다. 테스트 `twentyBuildsLimitCountsHiddenToo`.
+- (3) 이메일: `BuildView`에 이메일 필드가 없고 템플릿은 `ownerNickname`만 쓴다. 목록·상세·폼 전부 `everyBuildPageRendersWith200AndNoEmail`로 확인. 작성자 표시는 닉네임뿐.
+- (4) 고정 선택지: `BuildPart.accepts`가 null(미지정)과 목록 안 코드만 허용하고, 범위 밖 값은 `BuildChoiceException`으로 해당 필드에 거부된다. "기타" 코드는 목록에 있어 허용. 빈 값·공백은 `blankToNull`로 NULL 처리, 이름 비움은 화면에 "내 키보드"(테스트 `blankNameIsStoredAsNullAndShownAsMyKeyboard`). 범위 테스트 `choicesOutsideFixedListAreRejectedAndOtherIsAllowed`.
+- (5) 낙관적 잠금: `update`는 `findForUpdate` 잠금 뒤 `version`을 검사하고, 충돌은 `OptimisticLockingFailureException` → 409와 같은 폼 재렌더(`rerenderForm`). `switches/edit`과 같은 패턴. 테스트 `staleVersionRerendersFormWith409`.
+- (2) 수정·숨김 권한: Q1대로 로그인 여부만 본다. `SecurityConfig`가 `GET /builds/new`, `GET /builds/*/edit`, `POST /builds`, `POST /builds/*`, `POST /builds/*/hide|unhide`를 `authenticated()`로 잠갔다. 비로그인은 로그인 화면(`anonymousWritesAreSentToLogin`). 숨김 빌드 상세는 `view()`에서 작성자 외에 404(아래 R2 제외).
+
+### 필수 수정
+
+**R1. 숨긴 뒤 리다이렉트가 숨긴 사람에게 404가 된다**
+- `hide`·`update`는 `/builds/{id}`로 리다이렉트한다(build-screens §2와 일치). 그런데 상세는 숨김 빌드를 작성자 외에 404로 준다. 다른 회원이 빌드를 숨기면 리다이렉트 직후 그 회원은 404를 보고, 플래시 "숨겼어요"도 보지 못한다. 다른 회원이 숨김 빌드를 수정해도 같은 일이 생긴다.
+- 테스트 `hideRemovesFromListAndUnhideRestores`는 리다이렉트 위치만 검사하고 따라가지 않는다. 그래서 이 문제를 잡지 못했다.
+- 조치(아키텍트 결정 필요): 작성자가 아니면 `/builds`(목록)로 보내고 플래시 메시지를 남기거나, 설계를 바꿔 숨김을 건 사람도 상세를 볼 수 있게 한다. 테스트는 리다이렉트 뒤 `GET`까지 따라가 200(또는 목록 200)을 확인하도록 보강.
+
+**R2. 숨김 빌드의 수정 화면이 숨김을 무시하고 내용을 보여 준다**
+- `BuildController.editForm`은 `buildService.load(id)`를 쓴다. `view()`와 달리 숨김 여부와 작성자를 보지 않는다. 그래서 로그인한 다른 회원이 `GET /builds/{id}/edit`으로 숨김 빌드의 이름·메모·부품 값을 모두 볼 수 있다. 설계 §4("숨김 빌드 상세: 다른 회원 404")의 취지에 어긋나고, 숨긴 내용을 사실상 공개한다.
+- 테스트에 이 경로(숨김 빌드 편집 화면을 다른 회원이 여는 경우)가 없어서 잡히지 않았다.
+- 조치(아키텍트 결정 필요): (a) 숨김 빌드의 편집 화면과 저장은 작성자만(다른 회원은 404). 설계 §4 문구와 맞지만 Q1("누구나 수정")과 부분적으로 충돌하므로 Q1 해석을 확인할 것. (b) 다른 회원도 편집하게 하되 숨김 빌드의 내용을 편집 폼에 보여 주지 않는다. 실제로는 편집 자체가 불가능해지므로 (a)와 같다. 어느 쪽이든 `editForm`에 숨김 검사를 넣고, 숨김 빌드 편집 GET·POST에 대한 테스트를 추가한다.
+
+### 권고 (수정 요청 아님)
+- 숨김 해제·숨김 같은 상태 변경은 `setHidden`이 잠금 없이 호출되는 것이 아니라 잠금을 쓴다(`findForUpdate`). 문제 없음.
+- 목록의 `countQuery`·`join fetch`로 N+1은 막혀 있다. 확인 완료.
+- 테스트 목록(§8)의 "숨김 빌드 상세: 작성자 200, 다른 회원·비로그인 404"는 `hideRemovesFromListAndUnhideRestores` 안에 일부만 있다. 작성자 200과 다른 회원 404를 명시적으로 나눠 두면 좋다.
+
+### 재리뷰 조건
+R1·R2를 결정(아키텍트)한 뒤 수정하고, 위 테스트를 추가해 XML에서 통과를 확인하면 통과 처리한다.
+
+---
+
+## 빌드 재리뷰 (반려 R1·R2 수정 반영)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 12개 스위트 70개 전부 통과(합계 failures 0, errors 0, 13:30 실행). 재실행 없이 XML과 소스로 판단.
+
+### 판정: 통과
+
+### R2 숨김 빌드의 편집·수정 (확인)
+- 편집 GET: `editForm`이 `buildService.view(id, viewerId)`를 쓴다. `view`는 숨김이고 작성자가 아니면 `NoSuchElementException`(404)이므로, 다른 회원에게 폼 값(이름·메모·부품)이 전혀 나가지 않는다.
+- 수정 POST: `BuildService.update`가 잠금(`findForUpdate`) 뒤에 `requireVisibleTo`로 검사한다. 버전 검사보다 먼저 이뤄지므로 다른 회원은 숨김 빌드를 덮어쓸 수 없고, 그 전에 404가 난다. 회원 간 덮어쓰기 경로는 닫혔다.
+- 공개 빌드는 Q1대로 로그인 회원 누구나 수정할 수 있다(`requireVisibleTo`가 공개 빌드는 통과시킴).
+- 테스트 `otherMemberGetsNotFoundForHiddenBuildEditAndUpdate`: 다른 회원의 편집 GET·수정 POST → 404, 이름이 그대로 남음 확인, 작성자의 편집 GET → 200. 이 테스트가 R2를 직접 덮는다.
+
+### R1 리다이렉트 목적지 (확인)
+- 숨김(hide): `/builds`(목록). 목록은 숨김을 빼므로 숨긴 사람도 404를 보지 않는다. 플래시 "숨겼어요."는 목록 템플릿이 `message`로 표시한다.
+- 숨김 해제(unhide): `/builds/{id}`. 해제 직후 빌드는 공개이므로 누구에게나 200이다.
+- 수정(update): `/builds/{id}`. 수정이 성공하려면 viewer가 공개 빌드를 볼 수 있거나 작성자여야 하므로, 리다이렉트 시점에 상세는 200이다. 숨김 빌드를 작성자가 수정하면 작성자에게 보인다.
+- 따라서 숨김 상태에서 404가 되는 리다이렉트는 없다. 테스트 `hideRemovesFromListAndUnhideRestores`는 hide 후 목록으로 간다는 점이 바뀌었다. 리다이렉트 목적지를 따라가는 검사는 여전히 없지만, 목적지 자체가 위 조건을 만족하므로 결과에는 영향이 없다.
+
+### 확인 메모 (수정 요청 아님)
+- 설계 문서 `build-screens.md` §2는 숨김 성공 → `/builds/{id}`로 적혀 있다. 지금 구현은 `/builds`다. 화면 문서를 맞춰 고칠 것(문서 불일치).
+- 숨김 버튼은 로그인 회원 누구나에게 보인다(Q1). 작성자가 아닌 회원이 숨긴 빌드는 숨긴 사람에게도 상세가 404로 보인다는 점은 설계상 의도다. 숨김 상세를 본 적 없는 사람이 숨기는 것이므로 화면상 문제 없음.
+- 테스트 수: BuildTest 11개(신규 2건 포함) 중 실패 0. 전체 70개 XML 합계 확인.
