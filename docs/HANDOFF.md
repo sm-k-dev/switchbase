@@ -81,17 +81,10 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 - [ ] 첫 배포 (AWS EC2 + RDS) — README에 배포 정보 커밋이 있으나 실제 배포 여부는 사용자 확인 필요
 
 ### 2단계. 커뮤니티 열기 — 시작 단계 (다음 작업 대상)
-- [ ] **회원가입, 이메일 인증, 로그인 (Spring Security)**
-  - 주의: 마지막 커밋(eb8c0c2) 메시지는 "add member signup and login + tests"이지만,
-    실제 변경은 SecurityConfig·application.yaml·CSS·레이아웃 4개 파일뿐이다.
-    member 엔티티·마이그레이션·회원가입 화면·테스트는 저장소에 없다. 이 작업부터 다시 시작한다.
-  - **현재 관리자 로그인이 깨져 있다 (2026-11-08 확인).** 이 커밋이 `spring.security.user`(admin 계정)를
-    쓰지 않는 `spring.switchbase.admin` 설정으로 바꾸고, 로그인 화면을 `/login`(email 파라미터)으로 지정했지만
-    `/login` 화면과 회원 기반 `UserDetailsService`가 없다. 결과: `GET /login` → 404,
-    `/admin/**` 접근 불가, 관리자 CSV 가져오기도 불가. 기동 로그에 "Using generated security password"가 뜬다.
-    AdminAccessTest는 모의 사용자로 돌아서 이 문제를 잡지 못한다.
-  - 따라서 회원 작업의 **첫 완료 조건**: `/login` 화면, 회원(member) 기반 인증, 역할(ADMIN/USER),
-    `switchbase.admin.*` 설정으로 첫 관리자 계정을 만드는 초기화, 실제 로그인 흐름을 확인하는 통합 테스트.
+- [x] **회원가입, 이메일 인증, 로그인 (Spring Security)** — 완료 (2026-11-08, 커밋 1b2deca·e1aed40·064ce99)
+  - 회원(member) 기반 인증, ADMIN/USER, `switchbase.admin.*`로 첫 관리자 생성, 이메일 인증(개발 중엔 링크를 로그 출력), 실제 로그인 흐름 통합 테스트 42개 통과.
+  - 이전 커밋 eb8c0c2의 메시지는 내용과 맞지 않았다(히스토리는 그대로 둠). 상세: `docs/work/member-design.md`, `docs/work/member-progress.md`.
+  - prod 프로필은 SMTP 구현이 생기기 전까지 기동 실패(의도). §5의 SMTP 서비스 선택 참고.
 - [ ] 유저 위키 수정, 버전 비교, 되돌리기, 최근 변경 목록
 - [ ] 빌드 등록, 체감 평가 + 개조 태그(자동완성)
 - [ ] 집계: 평가 저장 시 이벤트로 switch_rating_stats 갱신, 표본 수 표시

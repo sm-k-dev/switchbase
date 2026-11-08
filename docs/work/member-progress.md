@@ -73,13 +73,18 @@ M2(`@Profile("!prod")`), R1(미사용 토큰 5개 상한), R3(htmx SRI+crossorig
 
 리뷰어 판정: 통과(반려 0). 42개 테스트 전부 통과(XML 근거), 리포트 이후 `src/` 변경 없음. 남은 권고(R2·R7·R8·V4 메모)는 SMTP 도입·2단계 후반으로 이월. 개발자에게 feat → test → docs 3커밋 지시(README `ADMIN_PASSWORD` 한 줄 포함 — 설계 §6, 현재 README에 없음).
 
+## 3-9. 커밋 완료
+
+1b2deca `feat(member)` (src/main 25파일) / e1aed40 `test(member)` (테스트 6파일) / 064ce99 `docs` (README 관리자 안내 + docs/ 8파일). push 안 함. 이후 HANDOFF 완료 표시를 `docs:` 커밋 1건으로 추가 예정.
+
 ## 4. 커밋 이력 주의
 
 eb8c0c2는 메시지(`feat(member)` + `test(member)` 혼합, 변경은 4개 파일뿐)가 내용과 맞지 않는다. 히스토리 재작성은 하지 않고, member 파일은 새 커밋으로 나눠 올린다(feat → test → docs).
 
 ## 5. 진행 순서
 
-1. [진행] 개발자: §2 수정 + design §8 테스트 작성 (실행 보류).
-2. [대기] Docker 해결 후 `./gradlew test` 통과.
-3. [대기] 리뷰어 리뷰 (코드+테스트). 반려 시 개발자 수정.
-4. [대기] 통과 후 개발자 커밋.
+1. [완료] 개발자: §2 수정 + design §8 테스트 작성.
+2. [완료] `sg docker -c ./gradlew test` 42개 통과 (§3-7).
+3. [완료] 리뷰어 정식 리뷰 통과 (§3-6, §3-8).
+4. [완료] 개발자 커밋 3건: `1b2deca` feat(member), `e1aed40` test(member), `064ce99` docs (push 안 함).
+5. [완료] HANDOFF 회원 항목 완료 표시 (`docs: HANDOFF 회원가입·로그인 완료 표시`).
