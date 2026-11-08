@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.switchbase.member.MemberUserDetails;
+import com.switchbase.ratings.RatingService;
 
 @Controller
 @RequestMapping("/switches")
@@ -16,8 +21,13 @@ public class SwitchController {
 
     private final SwitchService switchService;
 
-    SwitchController(SwitchService switchService) {
+    private static final int RATING_PAGE_SIZE = 20;
+
+    private final RatingService ratingService;
+
+    SwitchController(SwitchService switchService, RatingService ratingService) {
         this.switchService = switchService;
+        this.ratingService = ratingService;
     }
 
     @GetMapping
@@ -35,12 +45,19 @@ public class SwitchController {
     }
 
     @GetMapping("/{id}")
-    String detail(@PathVariable Long id, Model model) {
+    String detail(@PathVariable Long id,
+                  @RequestParam(value = "ratingPage", defaultValue = "0") int ratingPage,
+                  @AuthenticationPrincipal MemberUserDetails viewer, Model model) {
 
         model.addAttribute("sw", switchService.get(id));
         model.addAttribute("sources", switchService.sourcesOf(id));
         model.addAttribute("revisions", switchService.revisionsOf(id));
         model.addAttribute("aliases", switchService.aliasesOf(id));
+        model.addAttribute("switchId", id);
+        model.addAttribute("summary", ratingService.summary(id));
+        model.addAttribute("ratingPage", ratingService.list(id,
+                viewer == null ? null : viewer.getId(), viewer != null && viewer.isAdmin(),
+                PageRequest.of(Math.max(ratingPage, 0), RATING_PAGE_SIZE)));
 
         return "switches/detail";
     }

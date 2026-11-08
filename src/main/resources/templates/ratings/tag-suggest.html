@@ -1,0 +1,7 @@
+<!-- 개조 태그 자동완성 조각. GET /mod-tags/suggest 가 돌려준다(htmx). 태그 이름은 th:text로 이스케이프된다. -->
+<ul th:fragment="list" class="tag-suggest-list">
+    <li th:each="t : ${tags}">
+        <button type="button" th:attr="data-tag=${t}" th:text="${t}" onclick="addModTag(this.dataset.tag)">태그</button>
+    </li>
+    <li th:if="${tags.empty}" class="muted">기존 태그가 없어요. 입력한 그대로 새 태그가 됩니다.</li>
+</ul>

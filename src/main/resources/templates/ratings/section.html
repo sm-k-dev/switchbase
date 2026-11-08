@@ -1,0 +1,55 @@
+<!-- 스위치 상세에 들어가는 평가 요약과 목록. switches/detail.html에서 include한다.
+     사용: <th:block th:replace="~{ratings/section :: section}"></th:block>
+     모델: switchId, summary(RatingSummary), ratingPage(Page<RatingView>) -->
+<th:block th:fragment="section" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <h2>체감 평가</h2>
+
+    <p class="muted" th:if="${summary.sampleCount == 0}">아직 평가가 없어요.</p>
+    <p class="muted" th:unless="${summary.sampleCount == 0}"
+       th:text="|평가 ${summary.sampleCount}명 · ${summary.ratingCount}건|">평가 0명 · 0건</p>
+    <table class="spec-table" th:unless="${summary.sampleCount == 0}">
+        <tr>
+            <th>소리 크기</th>
+            <td><span th:text="${summary.avgSound} != null ? ${#numbers.formatDecimal(summary.avgSound, 1, 1)} : '-'">-</span>
+                <br><small class="muted">1은 작음, 5는 큼</small></td>
+        </tr>
+        <tr>
+            <th>피로도</th>
+            <td><span th:text="${summary.avgFatigue} != null ? ${#numbers.formatDecimal(summary.avgFatigue, 1, 1)} : '-'">-</span>
+                <br><small class="muted">1은 가벼움, 5는 피곤함</small></td>
+        </tr>
+        <tr>
+            <th>별점</th>
+            <td><span th:text="${summary.avgStar} != null ? ${#numbers.formatDecimal(summary.avgStar, 1, 1)} : '-'">-</span>
+                <span class="muted">(5점 만점)</span></td>
+        </tr>
+    </table>
+
+    <p><a th:href="@{/switches/{id}/ratings/new(id=${switchId})}" sec:authorize="isAuthenticated()">평가 남기기</a></p>
+
+    <ul class="ratings" th:unless="${ratingPage.empty}">
+        <li th:each="r : ${ratingPage.content}">
+            <strong th:text="${r.authorNickname}">닉네임</strong>
+            <span th:text="|별점 ${r.starRating}|">별점 5</span>
+            <span th:text="|소리 ${r.soundLevel} · ${r.soundTone}|">소리</span>
+            <span th:text="|타건감 ${r.feel} · 피로도 ${r.fatigueLevel}|">타건감</span>
+            <span th:unless="${r.lubedLabel == null}" th:text="|윤활 ${r.lubedLabel}|">윤활 예</span>
+            <span th:if="${r.buildLinked}" class="muted">빌드 있음</span>
+            <span th:each="tag : ${r.modTags}" class="tag" th:text="|#${tag}|">#태그</span>
+            <span class="muted" th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-08 12:00</span>
+            <!-- 수정은 작성자(mine), 삭제는 작성자 또는 관리자(deletable). 권한 판단은 서버가 계산한다 -->
+            <a th:if="${r.mine}" th:href="@{/ratings/{id}/edit(id=${r.id})}">수정</a>
+            <form th:if="${r.deletable}" th:action="@{/ratings/{id}/delete(id=${r.id})}" method="post" class="inline"
+                  onsubmit="return confirm('이 평가를 삭제할까요? 되돌릴 수 없어요.');">
+                <button type="submit">삭제</button>
+            </form>
+        </li>
+    </ul>
+    <p th:if="${ratingPage.empty}" class="muted">평가 목록이 비어 있어요.</p>
+
+    <nav class="pager" th:if="${ratingPage.totalPages > 1}">
+        <a th:if="${ratingPage.hasPrevious()}" th:href="@{/switches/{id}(id=${switchId}, ratingPage=${ratingPage.number - 1})}">이전</a>
+        <span th:text="|${ratingPage.number + 1} / ${ratingPage.totalPages}|">1 / 3</span>
+        <a th:if="${ratingPage.hasNext()}" th:href="@{/switches/{id}(id=${switchId}, ratingPage=${ratingPage.number + 1})}">다음</a>
+    </nav>
+</th:block>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${ratingId} ? '평가 수정' : '평가 남기기')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1 th:text="${ratingId} ? '평가 수정' : '평가 남기기'">평가 남기기</h1>
+
+    <form th:object="${form}" method="post" class="switch-form"
+          th:action="${ratingId} ? @{/ratings/{id}(id=${ratingId})} : @{/switches/{id}/ratings(id=${switchId})}">
+        <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+        <input type="hidden" th:field="*{version}">
+
+        <label>빌드
+            <select th:field="*{buildId}">
+                <!-- buildOptions 첫 항목이 "빌드 없음"(code=null). null은 빈 값으로 보내서 buildId=null이 된다 -->
+                <option th:each="o : ${buildOptions}" th:value="${o.code} ?: ''" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="muted">본인 빌드만 고를 수 있어요. 빌드가 없어도 평가할 수 있어요.</p>
+        <p class="error" th:errors="*{buildId}"></p>
+
+        <label>소리 크기 (1~5)
+            <select th:field="*{soundLevel}" required>
+                <option value="">고르세요</option>
+                <option th:each="n : ${#numbers.sequence(1, 5)}" th:value="${n}" th:text="${n}"></option>
+            </select>
+        </label>
+        <p class="muted">1은 작음, 5는 큼.</p>
+        <p class="error" th:errors="*{soundLevel}"></p>
+
+        <label>소리 성향
+            <select th:field="*{soundTone}" required>
+                <option value="">고르세요</option>
+                <option th:each="o : ${soundToneOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="muted">도각(짧고 맑은 소리), 쪅(높은 소리), 묵직(낮고 무거운 소리), 둔탁(울리는 소리).</p>
+        <p class="error" th:errors="*{soundTone}"></p>
+
+        <label>타건감
+            <select th:field="*{feel}" required>
+                <option value="">고르세요</option>
+                <option th:each="o : ${feelOptions}" th:value="${o.code}" th:text="${o.label}"></option>
+            </select>
+        </label>
+        <p class="muted">부드러움(매끈함), 명확함(걸림 없이 또렷함), 걸림(중간에 턱이 느껴짐).</p>
+        <p class="error" th:errors="*{feel}"></p>
+
+        <label>피로도 (1~5)
+            <select th:field="*{fatigueLevel}" required>
+                <option value="">고르세요</option>
+                <option th:each="n : ${#numbers.sequence(1, 5)}" th:value="${n}" th:text="${n}"></option>
+            </select>
+        </label>
+        <p class="muted">1은 가벼움, 5는 피곤함.</p>
+        <p class="error" th:errors="*{fatigueLevel}"></p>
+
+        <label>별점 (1~5)
+            <select th:field="*{starRating}" required>
+                <option value="">고르세요</option>
+                <option th:each="n : ${#numbers.sequence(1, 5)}" th:value="${n}" th:text="${n}"></option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{starRating}"></p>
+
+        <label>윤활
+            <select th:field="*{lubed}">
+                <option value="">미입력</option>
+                <option value="true">예</option>
+                <option value="false">아니오</option>
+            </select>
+        </label>
+        <p class="error" th:errors="*{lubed}"></p>
+
+        <label>개조 태그 (쉼표로 구분, 선택)
+            <input th:field="*{modTags}" placeholder="예: spring swap, 필름"
+                   autocomplete="off"
+                   hx-get="/mod-tags/suggest" hx-trigger="keyup changed delay:300ms" hx-target="#tag-suggest">
+        </label>
+        <div id="tag-suggest" class="tag-suggest"></div>
+        <p class="error" th:errors="*{modTags}"></p>
+
+        <button type="submit">저장</button>
+    </form>
+    <p><a th:href="${switchId} ? @{/switches/{id}(id=${switchId})} : @{/switches}">취소하고 돌아가기</a></p>
+</main>
+<script>
+    // 후보를 고르면 마지막 쉼표 뒤 입력을 그 태그로 바꾼다
+    function addModTag(tag) {
+        var input = document.querySelector('[name=modTags]');
+        var parts = input.value.split(',');
+        parts[parts.length - 1] = ' ' + tag;
+        input.value = parts.map(function (p) { return p.trim(); }).filter(Boolean).join(', ') + ', ';
+        document.getElementById('tag-suggest').innerHTML = '';
+        input.focus();
+    }
+</script>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -41,6 +41,10 @@
             <span th:text="${r.editSummary}">처음 등록</span>
         </li>
     </ol>
+
+    <th:block th:with="switchId=${sw.id}">
+        <th:block th:replace="~{ratings/section :: section}"></th:block>
+    </th:block>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

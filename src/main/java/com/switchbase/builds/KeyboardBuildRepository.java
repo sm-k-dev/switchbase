@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface KeyboardBuildRepository extends JpaRepository<KeyboardBuild, Long> {
@@ -26,6 +27,9 @@ public interface KeyboardBuildRepository extends JpaRepository<KeyboardBuild, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select m from Member m where m.id = :id")
     Optional<Member> lockMember(@Param("id") Long id);
+
+    /** 평가 폼의 빌드 목록(본인 것, 숨김 포함). */
+    List<KeyboardBuild> findByMemberIdOrderByCreatedAtDesc(Long memberId);
 
     /** 숨김 빌드도 포함해서 센다(Q3). */
     long countByMemberId(Long memberId);
