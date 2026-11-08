@@ -120,8 +120,9 @@ public class BuildController {
     }
 
     @PostMapping("/builds/{id}/unhide")
-    String unhide(@PathVariable Long id, RedirectAttributes redirect) {
-        buildService.setHidden(id, false);
+    String unhide(@PathVariable Long id,
+                  @AuthenticationPrincipal MemberUserDetails viewer, RedirectAttributes redirect) {
+        buildService.unhide(id, viewerId(viewer));
         redirect.addFlashAttribute("message", "다시 공개했어요.");
         return "redirect:/builds/" + id;
     }

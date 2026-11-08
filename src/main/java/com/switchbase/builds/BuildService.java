@@ -84,6 +84,20 @@ public class BuildService {
         return build;
     }
 
+    /**
+     * 숨김 해제. 숨김 빌드는 작성자만 풀 수 있고, 다른 회원(관리자 포함)에게는 404다(사용자 확정).
+     * 공개 빌드에 대한 해제 요청은 상태를 바꾸지 않는다.
+     */
+    @Transactional
+    public KeyboardBuild unhide(Long id, Long viewerId) {
+        KeyboardBuild build = lockForUpdate(id);
+        requireVisibleTo(build, viewerId);
+        if (build.isHidden()) {
+            build.changeHidden(false);
+        }
+        return build;
+    }
+
     private KeyboardBuild lockForUpdate(Long id) {
         return builds.findForUpdate(id)
                 .orElseThrow(() -> new NoSuchElementException("빌드가 없습니다: " + id));
