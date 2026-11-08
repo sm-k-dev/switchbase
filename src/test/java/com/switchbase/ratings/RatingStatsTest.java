@@ -205,7 +205,7 @@ class RatingStatsTest {
 
     /** 행 값이 rating 전체 집계와 같다는 것을 확인한다. */
     private void assertRowMatchesRatings(Long switchId) {
-        RatingSummary live = ratings.summaryOf(switchId);
+        RatingSummary live = ratings.summaryOf(switchId, com.switchbase.common.Retention.cutoff(java.time.Instant.now()));
         var row = statsRepo.findById(switchId).orElseThrow();
         assertThat(row.getRatingCount()).isEqualTo(live.ratingCount().intValue());
         assertThat(row.getMemberCount()).isEqualTo(live.sampleCount().intValue());
