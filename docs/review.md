@@ -190,3 +190,75 @@ R1·R2를 결정(아키텍트)한 뒤 수정하고, 위 테스트를 추가해 X
 
 ### 메모 (수정 요청 아님)
 - 작성자가 아닌 회원이 숨긴 빌드는 숨긴 사람도 해제할 수 없고, 작성자만 풀 수 있다. 이것이 확정 사항이며 §10에 기록되어 있다.
+
+---
+
+## 체감 평가 리뷰 (rating-design §3·§4·§5·§8, rating-screens)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 13개 스위트 85개 전부 통과(합계 failures 0, errors 0, 14:11 실행, `RatingTest` 14개). 재실행 없이 XML과 소스, 문서로 판단.
+
+### 판정: 반려 (필수 1건, 문서 정합 1건, 권고 2건)
+
+### 확인 통과
+- (1) 권한: 수정은 `loadForEdit`이 작성자가 아니면 404(서비스). 삭제는 `delete`가 작성자 또는 관리자만 통과시키고 제3자는 `RatingAccessDeniedException`(`@ResponseStatus(FORBIDDEN)`)으로 403. 템플릿은 `mine`(수정 링크)과 `deletable`(삭제 폼)만 쓰고, 두 값은 `RatingService.view`가 서버에서 계산한다. 테스트 `deletableAndMineFlagsFollowAuthorAndAdmin`, `deletionAllowedForAuthorAndAdminButNotThirdParty`, `authorEditsWithConflictAndOthersGetNotFound`.
+- (2) 유일성: V7의 `UNIQUE NULLS NOT DISTINCT (switch_id, member_id, build_id)`로 빌드 없는 평가도 스위치당 1건이 DB에서 보장된다. 서비스의 `findByKeyboardSwitchIdAndMemberIdAndBuildId(..., null)`는 Spring Data가 null을 `IS NULL`로 바꿔 같은 조건을 본다. 저장 시 유니크 위반은 `RatingDuplicateException`(409)로 바뀐다. 빌드 소유: `ownedBuild`가 `build.member == 요청자`를 확인하고, 남의 빌드·없는 빌드는 `BuildNotOwnedException`으로 폼 필드 오류. 테스트 `buildOfAnotherMemberCannotBeLinked`, `sameSwitchAndBuildCombinationIsRejectedOnceWithoutBuildToo`.
+- (3) 표본 수: `count(distinct r.member.id)`. 테스트 `sampleCountIsDistinctMembersNotBuilds`.
+- (4) 숨김 빌드: `RatingView`는 `buildLinked`(boolean)만 갖고 빌드 이름 필드가 없다. 목록 템플릿은 "빌드 있음"만 쓴다. 테스트 `hiddenBuildShowsOnlyAsBuildLinkedWithoutItsName`.
+- (5) 이메일: `RatingView`는 `authorNickname`만 가진다. 템플릿에 email 표시 없음. 테스트 `memberRatingIsListedWithNicknameAndNoEmail`, `pagesRenderWith200AndNoEmail`. 자동완성 조각은 `th:text`와 `th:attr`로 이스케이프되고, 클릭은 `this.dataset.tag`로 넘겨 문자열 주입이 없다. 테스트 `tagsAreNormalizedAndSuggestionIsEscaped`. 태그 정규화(공백 정리, 소문자 키, 처음 입력한 표시 형태)도 맞다.
+- `SecurityConfig`: 목록·요약은 공개, 등록·수정·삭제·자동완성 조각은 로그인 필요로 규칙이 있다. 상세의 `summary`·`list`는 비로그인에도 동작한다.
+
+### 필수 수정
+
+**R1. 개조 태그 동시 생성 시 500**
+- `RatingService.resolveTags`가 `tags.findByNormalized(key)`로 없으면 `tags.save(new ModTag(...))`를 호출한다. `ModTag.id`는 `GenerationType.IDENTITY`라 `save`가 바로 INSERT한다. 두 회원이 같은 새 태그를 동시에 등록하면 두 번째 INSERT가 `uk_mod_tag_normalized` 위반으로 `DataIntegrityViolationException`을 던진다.
+- 이 예외는 `saveRating`의 try 바깥(`resolveTags` 안)에서 나므로 `RatingController`의 catch에 걸리지 않는다. 결과는 **500**이다. 평가 등록과 수정 두 경로 모두 해당한다.
+- 조치: `tags.save`를 try로 감싸고 `DataIntegrityViolationException`이면 `tags.findByNormalized(key)`로 다시 찾아 쓴다(또는 `ON CONFLICT`에 준하는 재조회). 재현 테스트 추가는 선택이지만, 최소한 동시성 없이 "기존 태그를 재조회"하는 단위 검사 1건을 권한다. 
+- 참고: 이 예외를 `saveRating`의 catch로 옮기면 "이미 평가했어요"라는 잘못된 메시지가 나온다. 태그 경로에서 따로 처리해야 한다.
+
+### 문서 정합 (아키텍트 결정)
+- **수정 권한 응답 코드**: `rating-design.md` §8은 "다른 회원 수정 → 403"이라고 적었다. 구현과 `rating-screens.md` §1은 **404**다. 둘 중 하나로 맞출 것. 구현은 화면 문서를 따른 것으로 보인다. 404가 낫다는 판단이면 설계 §8을 고치면 된다.
+
+### 권고 (수정 요청 아님)
+- **평균 기준**: 요약의 평균은 `avg(...)`로 **평가 건수(행)** 기준이다. 표본 수는 **서로 다른 회원 수**다. 한 회원이 빌드 두 대로 평가하면 평균에 두 번 들어가는데 "N명"에는 한 명으로 세인다. 설계 §5.3은 평균 계산 방식을 명시하지 않았다. 회원별 평균을 먼저 낸 뒤 평균하거나, "N명"을 "N건"으로 바꿀지 정할 것.
+- **LIKE 이스케이프**: 자동완성은 `findTop10ByNormalizedStartingWithOrderByNormalizedAsc`를 쓴다. 입력의 `%`·`_`가 와일드카드로 작동하는지 확인하지 않았다. 결과 개수만 바뀌고 주입은 아니므로 낮은 위험이다.
+- 테스트 공백(참고): 수정 화면에서 빌드를 다른 기존 평가와 같은 조합으로 바꾸는 경로(`update`의 중복 검사)는 테스트 이름에 보이지 않는다. 있으면 좋고 없어도 DB 유니크가 막는다.
+
+### 재리뷰 조건
+R1을 고치고 XML에서 통과를 확인하면 통과 처리한다. 문서 정합 항목은 아키텍트 결정 후 맞춘다.
+
+---
+
+## 체감 평가 재리뷰 (필수 1·정합·권고 반영)
+
+작성: 리뷰어 / 2026-11-08 / 근거: `build/test-results/test/*.xml` 13개 스위트 87개 전부 통과(합계 failures 0, errors 0, 14:16 실행, `RatingTest` 17개 중 신규·갱신 3건 확인). 재실행 없이 XML과 소스, 문서로 판단.
+
+### 판정: 통과 (주석 정리 1건 권고)
+
+### 필수 1: 태그 동시 생성 (확인)
+- `ModTagWriter.insert`가 `@Transactional(REQUIRES_NEW)`로 `saveAndFlush`한다. 유니크 위반은 이 내부 트랜잭션만 롤백시키고, 평가를 저장하는 바깥 트랜잭션은 살아 있다. `ModTagWriter`는 별도 빈이라 프록시 호출이 맞게 동작한다(자기 호출 아님).
+- `RatingService.createOrReuse`가 `DataIntegrityViolationException`을 잡고 `tags.findByNormalized(normalized)`로 같은 키를 다시 찾는다. 바깥 트랜잭션은 커밋 전 조회이므로 이미 커밋된 행을 본다. 못 찾는 드문 경우에만 `OptimisticLockingFailureException`을 던진다.
+- 컨트롤러: `create`가 `OptimisticLockingFailureException`을 409로 재렌더한다. `update`도 같은 예외를 409로 처리한다(태그 경합이 낙관적 잠금 충돌과 같은 처리). 500 경로는 보이지 않는다.
+- 테스트 `concurrentNewTagCreationDoesNotFail500`이 통과.
+
+### 정합: 수정 타인 403 (확인)
+- `loadForEdit`이 작성자가 아니면 `RatingAccessDeniedException`(403)을 던진다. 수정 화면 GET과 수정 POST 모두 이 경로를 쓴다.
+- `rating-screens.md` §1과 `rating-design.md` §8이 모두 403으로 맞춰졌다. 테스트 `authorEditsWithConflictAndOthersGetForbidden` 통과.
+
+### 권고: 요약 (확인)
+- `RatingSummary`에 `ratingCount`(평가 건수)가 추가됐다. `sampleCount`는 서로 다른 회원 수다. 평균은 평가 건 기준이다. 쿼리는 `count(r)`과 `count(distinct r.member.id)`를 함께 낸다.
+- 표본 수 정의는 설계와 일치한다. 테스트 `sampleCountIsDistinctMembersNotBuilds` 유지.
+- LIKE 와일드카드: 테스트 `suggestionTreatsLikeWildcardsAsLiterals`가 `%`·`_`를 문자 그대로 취급함을 확인한다.
+
+### 메모 (수정 요청 아님, 정리 권고)
+- **주석 불일치 3곳**: 정합 결정 후 주석이 이전 404 기준으로 남아 있다.
+  - `RatingService.java:29` 클래스 설명: "수정은 작성자만(아니면 404)" → 403으로 고칠 것.
+  - `RatingService.java:121` `update` 설명: "작성자만(아니면 404)" → 403으로 고칠 것. 실제로 `update`는 `loadForEdit`을 쓰므로 403이다.
+  - `RatingController.java:75` `editForm` 설명: "작성자가 아니면 404" → 403으로 고칠 것.
+  - 코드 동작은 맞다. 주석만 맞추면 된다.
+- **ratingCount 미표시**: `ratings/section.html`은 "평가 N명"만 보여 준다. `M건`을 쓰기로 했으면 템플릿에 추가하고, 쓰지 않을 거면 필드를 둘 이유를 정할 것. 현재는 데이터만 있다.
+- **커넥션 사용**: `REQUIRES_NEW`는 태그 생성 순간 두 번째 DB 연결을 잡는다. 동시 등록이 많으면 커넥션 풀(Hikari 기본 10)에 부담이 될 수 있다. 지금 규모에서는 문제 없다. 트래픽이 늘면 태그 생성을 평가 저장 전에 짧게 끝내는 구조를 검토할 것.
+- 태그 경합 메시지: 태그 경합이 `update`·`create` 모두에서 "그 사이 다른 사람이 먼저 고쳤어요" 문구로 나간다. 평가 경합에는 맞지만 태그 전용 문구가 아니다. 허용 범위다.
+
+### 재리뷰 후속 확인 (체감 평가)
+- `ratings/section.html` 9행에 `평가 N명 · M건`(sampleCount·ratingCount)이 반영되어 있음을 확인. 권고 항목 해소.
+- 주석 404 3곳(`RatingService` 29·121행, `RatingController` 75행)은 아직 404로 남아 있음. 동작은 403이 맞으므로 주석만 고치면 됨. 개발자 반영 후 주석 확인 예정(통과 판정에는 영향 없음).
