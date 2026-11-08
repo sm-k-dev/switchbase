@@ -11,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,9 +36,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {
+        "switchbase.admin.email=admin@switchbase.local",
+        "switchbase.admin.password=AdminPassw0rd!"
+})
 class BuildTest {
 
     static final String PASSWORD = "password123";
+    static final String ADMIN_EMAIL = "admin@switchbase.local";
+    static final String ADMIN_PASSWORD = "AdminPassw0rd!";
 
     @Autowired MockMvc mvc;
     @Autowired BuildService buildService;
@@ -148,13 +155,36 @@ class BuildTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("숨김")));
 
+        // 숨김 해제는 작성자만 가능하다. 숨긴 사람(다른 회원)이 풀려고 하면 404
         mvc.perform(post("/builds/" + build.getId() + "/unhide").session(login(other.getEmail())).with(csrf()))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/builds/" + build.getId() + "/unhide").session(login(owner.getEmail())).with(csrf()))
                 .andExpect(redirectedUrl("/builds/" + build.getId()))
                 .andExpect(flash().attribute("message", "다시 공개했어요."));
         mvc.perform(get("/builds/" + build.getId()))
                 .andExpect(status().isOk());
         mvc.perform(get("/builds"))
                 .andExpect(content().string(containsString(name)));
+    }
+
+    // 숨김 해제는 작성자만. 다른 회원과 관리자는 404.
+    @Test
+    void onlyOwnerCanUnhideAndOthersGetNotFound() throws Exception {
+        Member owner = verifiedMember();
+        Member other = verifiedMember();
+        KeyboardBuild build = createBuild(owner, "Unhide " + hex());
+        buildService.setHidden(build.getId(), true);
+
+        mvc.perform(post("/builds/" + build.getId() + "/unhide").session(login(other.getEmail())).with(csrf()))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/builds/" + build.getId() + "/unhide").session(adminSession()).with(csrf()))
+                .andExpect(status().isNotFound());
+        assertThat(buildService.load(build.getId()).isHidden()).isTrue();
+
+        mvc.perform(post("/builds/" + build.getId() + "/unhide").session(login(owner.getEmail())).with(csrf()))
+                .andExpect(redirectedUrl("/builds/" + build.getId()));
+        mvc.perform(get("/builds/" + build.getId()))
+                .andExpect(status().isOk());
     }
 
     // R2. 숨김 빌드의 편집 화면과 수정은 작성자만 열린다. 다른 회원에게는 404.
@@ -279,7 +309,15 @@ class BuildTest {
     }
 
     private MockHttpSession login(String email) throws Exception {
-        MvcResult result = mvc.perform(post("/login").param("email", email).param("password", PASSWORD).with(csrf()))
+        return loginWith(email, PASSWORD);
+    }
+
+    private MockHttpSession adminSession() throws Exception {
+        return loginWith(ADMIN_EMAIL, ADMIN_PASSWORD);
+    }
+
+    private MockHttpSession loginWith(String email, String password) throws Exception {
+        MvcResult result = mvc.perform(post("/login").param("email", email).param("password", password).with(csrf()))
                 .andReturn();
         return (MockHttpSession) result.getRequest().getSession(false);
     }
