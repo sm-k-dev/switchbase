@@ -89,7 +89,7 @@ class SwitchEditorDisplayTest {
         assertThat(first.getEditorMemberId()).isEqualTo(adminId);
         assertThat(first.getEditorDisplay()).isEqualTo(ADMIN_NICKNAME);
 
-        mvc.perform(post("/admin/switches/" + id).session(session).with(csrf())
+        mvc.perform(post("/switches/" + id).session(session).with(csrf())
                         .param("manufacturer", "Gateron")
                         .param("modelName", model)
                         .param("switchType", "LINEAR")
