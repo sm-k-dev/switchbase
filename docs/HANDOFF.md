@@ -125,7 +125,7 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 
 ### 3단계. 소리와 비교
 - [ ] 타건음 샘플 등록 (유튜브 URL + 시작 시간 + 녹음 조건)
-  - 설계 초안: `docs/work/sound-compare-design.md` (사용자 결정 Q1~Q8 대기)
+  - 설계 초안: `docs/work/sound-compare-design.md` (2026-11-20 확정, 사용자 결정 Q1~Q8 추천안 적용)
 - [ ] A vs B 비교 화면 (스펙, 체감 평균 레이더 차트, 같은 채널 샘플 우선)
 - [ ] 입문자 가이드 + 감각 용어 사전
 - [ ] 빌드 조건 필터로 체감 평균 좁혀 보기
