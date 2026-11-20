@@ -114,7 +114,7 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
     - 숨김 후기에 다른 회원의 도움됨 토글 차단
     - 탈퇴 회원 표기 "탈퇴한 회원"으로 통일 (`Member.getDisplayNickname`)
     - 재가입 차단 해시를 HMAC-SHA256으로 변경. 운영 배포 전 환경 변수 `SIGNUP_BLOCK_SECRET` 필요 (README 참고). 기존 SHA-256 차단 행은 무효가 되며 배포 전이라 영향 없음.
-  - 아직 열린 항목: `docs/work/review-dev-questions.md`의 V9 대조 질문 1건(스위치당 1건 DB 제약 `uk_review_switch_member` 유지 여부. 추천: 유지). `report.deleted_at` 제거는 V10으로 이미 반영됨.
+  - V9 대조 질문 결정(2026-11-20): 스위치당 후기 1건 DB 제약 `uk_review_switch_member`는 **유지**. 설계 문서 §6 Q2와 DDL에 반영. `report.deleted_at` 제거는 V10으로 반영됨.
     - 도움됨 목록 N+1 쿼리
   - 상세: `docs/work/review-collection-report-design.md`, `docs/work/review-screens.md`, `docs/review.md`.
   - 설계 문서: `docs/work/review-collection-report-design.md` (화면 계약 초안: `docs/work/review-screens-draft.md`)

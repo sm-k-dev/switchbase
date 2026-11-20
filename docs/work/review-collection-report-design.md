@@ -69,7 +69,7 @@ CREATE TABLE review (
     updated_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
 );
 -- 스위치당 활성 후기 1건(§6 Q2). 삭제된 후기는 제외
-CREATE UNIQUE INDEX uk_review_active ON review (switch_id, member_id) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX uk_review_switch_member ON review (switch_id, member_id) WHERE deleted_at IS NULL;
 CREATE INDEX ix_review_switch ON review (switch_id, created_at DESC);
 
 -- 도움됨 투표 (회원당 1회, 토글은 행 추가/삭제). 탈퇴 시 즉시 하드 삭제(§6-4)
