@@ -125,8 +125,10 @@ class ReportBuildTest {
                 .andExpect(status().is3xxRedirection());
 
         ReportView view = reportService.list(ReportStatus.RESOLVED, PageRequest.of(0, 500)).getContent().stream()
-                .filter(v -> ("/builds/" + build.getId()).equals(v.targetHref()))
+                .filter(v -> reportId.equals(v.id()))
                 .findFirst().orElseThrow();
+        // 숨김 빌드는 관리자에게 링크를 주지 않고 상태 문구만 보여 준다(404 링크 제거)
+        assertThat(view.targetHref()).isNull();
         assertThat(view.targetState()).isEqualTo("숨김");
         assertThat(view.status()).isEqualTo("RESOLVED");
     }
@@ -221,7 +223,7 @@ class ReportBuildTest {
         return switchService.create(spec, java.util.List.of(), "등록", null, "tester", null).getId();
     }
 
-    // 관리자 신고 목록: 200으로 렌더링되고, 숨긴 빌드는 '숨김' 상태로 보인다
+    // 관리자 신고 목록: 200으로 렌더링되고, 숨긴 빌드는 링크 없이 '숨김' 상태로 보인다
     @Test
     void adminReportListRendersWithHiddenState() throws Exception {
         Member owner = verifiedMember();
@@ -235,7 +237,7 @@ class ReportBuildTest {
         mvc.perform(get("/admin/reports").param("status", "RESOLVED").session(adminSession()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/reports"))
-                .andExpect(content().string(containsString("/builds/" + build.getId())))
+                .andExpect(content().string(not(containsString("href=\"/builds/" + build.getId() + "\""))))
                 .andExpect(content().string(containsString("숨김")));
         mvc.perform(get("/admin/reports").param("status", "RECEIVED").session(adminSession()))
                 .andExpect(status().isOk());
