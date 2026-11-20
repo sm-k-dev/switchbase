@@ -25,7 +25,8 @@ class MemberServiceUnitTest {
     VerificationNotifier notifier = mock(VerificationNotifier.class);
     SignupBlockRepository blocks = mock(SignupBlockRepository.class);
     MemberService service = new MemberService(members, tokens,
-            PasswordEncoderFactories.createDelegatingPasswordEncoder(), notifier, "http://localhost:8090", blocks);
+            PasswordEncoderFactories.createDelegatingPasswordEncoder(), notifier, "http://localhost:8090", blocks,
+            new SignupBlockHasher("unit-test-secret"));
 
     // M1. 존재 확인 뒤 저장 전에 다른 요청이 같은 값을 넣은 경우
     @Test

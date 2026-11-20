@@ -217,7 +217,7 @@ public class RatingService {
         boolean mine = isAuthor(r, viewerId);
         return new RatingView(
                 r.getId(),
-                r.getMember().getNickname(),
+                r.getMember().getDisplayNickname(),
                 r.getStarRating().intValue(),
                 r.getSoundLevel().intValue(),
                 r.getSoundTone().getLabel(),

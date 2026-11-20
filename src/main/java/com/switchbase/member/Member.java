@@ -87,6 +87,11 @@ public class Member {
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public String getNickname() { return nickname; }
+
+    /** 화면에 보이는 닉네임. 탈퇴 회원은 내부용 "탈퇴회원<id>" 대신 "탈퇴한 회원"으로 보인다. */
+    public String getDisplayNickname() {
+        return isWithdrawn() ? "탈퇴한 회원" : nickname;
+    }
     public Role getRole() { return role; }
     public boolean isEmailVerified() { return emailVerified; }
     public Instant getCreatedAt() { return createdAt; }

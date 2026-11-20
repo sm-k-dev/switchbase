@@ -31,11 +31,14 @@ public class WithdrawalService {
     private final ReportRepository reports;
     private final SwitchRevisionRepository revisions;
     private final EmailVerificationTokenRepository tokens;
+    private final SignupBlockHasher signupBlockHasher;
 
     public WithdrawalService(MemberRepository members, SignupBlockRepository blocks,
                              CollectionItemRepository collections, ReviewVoteRepository votes,
                              ReviewRepository reviews, ReviewService reviewService, ReportRepository reports,
-                             SwitchRevisionRepository revisions, EmailVerificationTokenRepository tokens) {
+                             SwitchRevisionRepository revisions, EmailVerificationTokenRepository tokens,
+                             SignupBlockHasher signupBlockHasher) {
+        this.signupBlockHasher = signupBlockHasher;
         this.members = members;
         this.blocks = blocks;
         this.collections = collections;
@@ -58,7 +61,7 @@ public class WithdrawalService {
         Instant until = now.plus(Retention.PERIOD);
 
         if (m.getEmail() != null) {
-            String hash = MemberService.sha256Hex(m.getEmail());
+            String hash = signupBlockHasher.hash(m.getEmail());
             blocks.findById(hash).ifPresentOrElse(
                     b -> b.extendTo(until),
                     () -> blocks.save(new SignupBlock(hash, until)));

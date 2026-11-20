@@ -27,7 +27,7 @@ public record BuildView(
         return new BuildView(
                 b.getId(),
                 name == null ? "내 키보드" : name,
-                b.getMember().getNickname(),
+                b.getMember().getDisplayNickname(),
                 label(BuildPart.HOUSING, b.getHousingMaterial()),
                 label(BuildPart.PLATE, b.getPlateMaterial()),
                 label(BuildPart.MOUNT, b.getMountType()),

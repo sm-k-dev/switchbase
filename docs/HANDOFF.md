@@ -109,11 +109,12 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 - [x] 후기, 내 컬렉션, 신고, 회원 탈퇴 — 구현·리뷰 완료 (2026-11-08)
   - 커밋: 702f98a `feat(review)`, e081c6c `test(review)`, ccfbec7 `docs(review)`, c4d012e `feat(review)`(탈퇴·V10 정리), 9df28d0 `docs(review)`. 리뷰어 최종 판정 통과(XML 기준 120개 테스트 실패 0).
   - 리뷰 중 반려(R1 탈퇴 회원 기존 세션 차단, R2 도움됨 동시성, R3 컬렉션 중복 클릭 500)는 모두 수정·재리뷰 통과.
-  - 아직 열린 항목: `docs/work/review-dev-questions.md`의 V9 대조 질문 2건(스위치당 1건 DB 제약 유지 여부, `report.deleted_at` 제거 여부)과 아래 권고.
-    - 신고 목록의 숨김 빌드 링크가 관리자에게 404가 나는 문제 (링크 제거 또는 상태 문구만 표시)
-    - 숨김 후기에 다른 회원의 도움됨 토글을 막을지 여부
-    - 탈퇴 회원 표기 통일 ("탈퇴한 회원" vs `탈퇴회원<id>`)
-    - `signup_block` 해시를 서버 비밀값 기반 HMAC으로 바꿀지 여부
+  - 리뷰 권고 반영 (2026-11-08, 컴파일·테스트는 이 세션에서 실행하지 못함. 다음 세션에서 `sg docker -c "./gradlew test"`로 확인 필요):
+    - 신고 목록의 숨김 빌드 링크 제거, 상태 문구만 표시
+    - 숨김 후기에 다른 회원의 도움됨 토글 차단
+    - 탈퇴 회원 표기 "탈퇴한 회원"으로 통일 (`Member.getDisplayNickname`)
+    - 재가입 차단 해시를 HMAC-SHA256으로 변경. 운영 배포 전 환경 변수 `SIGNUP_BLOCK_SECRET` 필요 (README 참고). 기존 SHA-256 차단 행은 무효가 되며 배포 전이라 영향 없음.
+  - 아직 열린 항목: `docs/work/review-dev-questions.md`의 V9 대조 질문 1건(스위치당 1건 DB 제약 `uk_review_switch_member` 유지 여부. 추천: 유지). `report.deleted_at` 제거는 V10으로 이미 반영됨.
     - 도움됨 목록 N+1 쿼리
   - 상세: `docs/work/review-collection-report-design.md`, `docs/work/review-screens.md`, `docs/review.md`.
   - 설계 문서: `docs/work/review-collection-report-design.md` (화면 계약 초안: `docs/work/review-screens-draft.md`)

@@ -15,6 +15,8 @@ switchbase:
     email: ${ADMIN_EMAIL:admin@switchbase.local}
     nickname: ${ADMIN_NICKNAME:admin}
     password: ${ADMIN_PASSWORD:}      # 기본값 없음. 비어 있으면 관리자 생성을 건너뛰고 WARN 로그
+  signup-block:
+    secret: ${SIGNUP_BLOCK_SECRET:}   # 재가입 차단 HMAC 키. 기본값 없음. 비어 있으면 기동 실패
 
 server:
   port: 8090

@@ -46,4 +46,6 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	// 재가입 차단 HMAC 키. 테스트 전용 값이며 운영 값은 환경 변수로만 준다.
+	environment("SIGNUP_BLOCK_SECRET", "test-only-signup-block-secret")
 }

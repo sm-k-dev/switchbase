@@ -114,6 +114,10 @@ public class ReviewService {
         if (isAuthor(r, viewerId)) {
             throw new IllegalArgumentException("본인 후기에는 도움됨을 누를 수 없어요");
         }
+        if (r.isHidden()) {
+            // 숨김 후기는 작성자 말고는 보이지 않으므로, 다른 회원의 투표로 카운트가 바뀌지 않게 막는다.
+            throw new IllegalArgumentException("숨김 후기에는 도움됨을 누를 수 없어요");
+        }
         if (votes.existsByReviewIdAndMemberId(id, viewerId)) {
             votes.deleteVote(id, viewerId);
         } else {
@@ -156,10 +160,9 @@ public class ReviewService {
 
     private ReviewView view(Review r, Long viewerId, boolean viewerAdmin) {
         boolean mine = isAuthor(r, viewerId);
-        boolean withdrawn = r.getMember().isWithdrawn();
         return new ReviewView(
                 r.getId(),
-                withdrawn ? "탈퇴한 회원" : r.getMember().getNickname(),
+                r.getMember().getDisplayNickname(),
                 r.getBody(),
                 r.recommendations().stream().map(RecommendFor::getLabel).toList(),
                 r.getHelpfulCount(),

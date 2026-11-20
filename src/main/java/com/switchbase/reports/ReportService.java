@@ -128,7 +128,9 @@ public class ReportService {
 
     private ReportView view(Report r) {
         Optional<Target> target = resolve(r.getTargetType(), r.getTargetId());
-        String href = target.map(Target::href).orElse(null);
+        // 숨김 빌드는 작성자 말고는 404라 관리자 목록에서 링크를 걸지 않는다(리뷰 권고). 상태 문구로 대신 보여 준다.
+        String href = target.filter(t -> !(t.hidden() && t.buildId() != null))
+                .map(Target::href).orElse(null);
         String state = target.isEmpty() ? "대상 없음" : (target.get().hidden() ? "숨김" : "");
         Member reporter = r.getReporter();
         String reporterLabel = reporter == null ? "탈퇴한 회원" : reporter.getNickname();

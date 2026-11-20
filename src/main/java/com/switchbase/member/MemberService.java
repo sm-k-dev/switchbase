@@ -38,16 +38,19 @@ public class MemberService {
                          PasswordEncoder passwordEncoder,
                          VerificationNotifier notifier,
                          @Value("${switchbase.base-url}") String baseUrl,
-                         SignupBlockRepository blocks) {
+                         SignupBlockRepository blocks,
+                         SignupBlockHasher signupBlockHasher) {
         this.members = members;
         this.tokens = tokens;
         this.passwordEncoder = passwordEncoder;
         this.notifier = notifier;
         this.baseUrl = baseUrl;
         this.blocks = blocks;
+        this.signupBlockHasher = signupBlockHasher;
     }
 
     private final SignupBlockRepository blocks;
+    private final SignupBlockHasher signupBlockHasher;
 
     /**
      * 가입. 중복 검사는 이 메서드 한 곳에서 한다(계정 존재 노출 정책을 바꿀 때 여기만 고치면 된다).
@@ -56,7 +59,7 @@ public class MemberService {
     public Member signup(SignupForm form) {
         String email = Member.normalizeEmail(form.getEmail());
         // 탈퇴 후 보관 기간 안의 이메일은 다시 가입할 수 없다(Q15)
-        if (blocks.findById(sha256Hex(email))
+        if (blocks.findById(signupBlockHasher.hash(email))
                 .filter(b -> b.getExpiresAt().isAfter(java.time.Instant.now())).isPresent()) {
             throw new SignupBlockedException();
         }
