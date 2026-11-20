@@ -109,7 +109,7 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 - [x] 후기, 내 컬렉션, 신고, 회원 탈퇴 — 구현·리뷰 완료 (2026-11-08)
   - 커밋: 702f98a `feat(review)`, e081c6c `test(review)`, ccfbec7 `docs(review)`, c4d012e `feat(review)`(탈퇴·V10 정리), 9df28d0 `docs(review)`. 리뷰어 최종 판정 통과(XML 기준 120개 테스트 실패 0).
   - 리뷰 중 반려(R1 탈퇴 회원 기존 세션 차단, R2 도움됨 동시성, R3 컬렉션 중복 클릭 500)는 모두 수정·재리뷰 통과.
-  - 리뷰 권고 반영 (2026-11-08, 컴파일·테스트는 이 세션에서 실행하지 못함. 다음 세션에서 `sg docker -c "./gradlew test"`로 확인 필요):
+  - 리뷰 권고 반영 (커밋 5b2bfdb, 테스트 수정 a601f6f. 사용자 PC(Windows)에서 `.\gradlew.bat test` 전체 통과 확인):
     - 신고 목록의 숨김 빌드 링크 제거, 상태 문구만 표시
     - 숨김 후기에 다른 회원의 도움됨 토글 차단
     - 탈퇴 회원 표기 "탈퇴한 회원"으로 통일 (`Member.getDisplayNickname`)
