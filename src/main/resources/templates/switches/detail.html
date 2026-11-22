@@ -53,6 +53,10 @@
     <th:block th:with="switchId=${sw.id}">
         <th:block th:replace="~{reviews/section :: section}"></th:block>
     </th:block>
+
+    <th:block th:with="switchId=${sw.id}">
+        <th:block th:replace="~{sounds/section :: section}"></th:block>
+    </th:block>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>

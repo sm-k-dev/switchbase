@@ -27,14 +27,17 @@ public class SwitchController {
 
     private final com.switchbase.reviews.ReviewService reviewService;
     private final com.switchbase.collections.CollectionService collectionService;
+    private final com.switchbase.sounds.SoundService soundService;
 
     SwitchController(SwitchService switchService, RatingService ratingService,
                      com.switchbase.reviews.ReviewService reviewService,
-                     com.switchbase.collections.CollectionService collectionService) {
+                     com.switchbase.collections.CollectionService collectionService,
+                     com.switchbase.sounds.SoundService soundService) {
         this.switchService = switchService;
         this.ratingService = ratingService;
         this.reviewService = reviewService;
         this.collectionService = collectionService;
+        this.soundService = soundService;
     }
 
     @GetMapping
@@ -73,6 +76,7 @@ public class SwitchController {
         model.addAttribute("ratingPage", ratingService.list(id,
                 viewer == null ? null : viewer.getId(), viewer != null && viewer.isAdmin(),
                 PageRequest.of(Math.max(ratingPage, 0), RATING_PAGE_SIZE)));
+        model.addAttribute("soundGroups", soundService.list(id, viewer == null ? null : viewer.getId()));
 
         return "switches/detail";
     }

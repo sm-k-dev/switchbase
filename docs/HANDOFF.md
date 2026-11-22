@@ -128,7 +128,8 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
   - 구현: V11 마이그레이션(`sound_sample`, `sound_sample_condition`), `sounds` 패키지(등록 서비스, 유튜브 주소·시작 시간 파서, 폼, 컨트롤러), 등록 화면 `sounds/form.html`, 보안 규칙 2개.
   - 확인: 주소·시작 시간 파서는 독립 실행으로 검증 완료(JDK 21). Spring 컴파일, 전체 테스트, 마이그레이션 적용은 **미실행**.
   - 다음: 사용자 PC에서 `.\gradlew.bat test` 실행 후 결과 기록. `YoutubeRefTest`와 등록 통합 테스트(중복·권한·잘못된 주소) 추가 필요.
-  - 남은 항목: 샘플 목록(스위치 상세), A vs B 비교, 빌드 필터, 입문자 가이드·용어 사전.
+  - 샘플 목록: 스위치 상세 하단(`sounds/section.html`). 채널별 묶음, 누를 때만 임베드, 숨김은 작성자에게만. 그룹핑·시간 표시 단위 테스트(`SoundViewTest`)는 독립 실행으로 확인. 재생 실패 신고는 신고 대상에 샘플이 없어 미구현.
+  - 남은 항목: A vs B 비교, 빌드 필터, 입문자 가이드·용어 사전.
   - 설계: `docs/work/sound-compare-design.md` (2026-11-20 확정)
   - 설계 초안: `docs/work/sound-compare-design.md` (2026-11-20 확정, 사용자 결정 Q1~Q8 추천안 적용)
 - [ ] A vs B 비교 화면 (스펙, 체감 평균 레이더 차트, 같은 채널 샘플 우선)

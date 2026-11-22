@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -24,6 +25,18 @@ public class SoundService {
         this.samples = samples;
         this.switches = switches;
         this.members = members;
+    }
+
+    /** 스위치 상세의 샘플 목록. 누구나 볼 수 있고, 채널별로 묶어 돌려준다. */
+    @Transactional(readOnly = true)
+    public List<SoundView.Group> list(Long switchId, Long viewerId) {
+        if (!switches.existsById(switchId)) {
+            throw new NoSuchElementException("스위치가 없습니다: " + switchId);
+        }
+        List<SoundView> views = samples.findVisible(switchId, viewerId == null ? -1L : viewerId).stream()
+                .map(s -> SoundView.from(s, viewerId))
+                .toList();
+        return SoundView.groupByChannel(views);
     }
 
     /**

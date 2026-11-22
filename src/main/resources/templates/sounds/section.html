@@ -1,0 +1,51 @@
+<!-- 스위치 상세의 타건음 샘플 목록. switches/detail.html에서 include한다.
+     사용: <th:block th:replace="~{sounds/section :: section}"></th:block>
+     모델: switchId, soundGroups(List<SoundView.Group>). 영상은 누를 때만 불러온다(외부 요청 최소화). -->
+<th:block th:fragment="section" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <h2>타건음 샘플</h2>
+
+    <p class="muted" th:if="${soundGroups.isEmpty()}">아직 올라온 샘플이 없어요.</p>
+
+    <section th:each="group : ${soundGroups}" class="sound-channel">
+        <h3 th:text="|${group.channelName} (${group.samples.size()})|">채널 이름</h3>
+        <ul class="sound-list">
+            <li th:each="s : ${group.samples}" class="sound-item">
+                <button type="button" class="sound-play"
+                        th:attr="data-video=${s.youtubeId},data-start=${s.startSeconds}">
+                    ▶ <span th:text="|시작 ${s.startLabel}|">시작 1:23</span>
+                </button>
+                <span class="muted" th:each="label : ${s.conditionLabels}" th:text="${label}">케이스 없음</span>
+                <span class="muted">· 올린 사람 <span th:text="${s.uploaderName}">닉네임</span></span>
+                <span th:if="${s.hidden}" class="error">숨김 처리된 샘플입니다 (작성자에게만 보여요)</span>
+                <div class="sound-player" hidden></div>
+            </li>
+        </ul>
+    </section>
+
+    <p><a th:href="@{/switches/{id}/sounds/new(id=${switchId})}" sec:authorize="isAuthenticated()">샘플 올리기</a></p>
+
+    <script>
+        // 재생 버튼을 누를 때만 유튜브 임베드를 만든다. 주소는 youtube-nocookie 도메인을 쓴다.
+        document.querySelectorAll('.sound-play').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var item = btn.closest('.sound-item');
+                var box = item.querySelector('.sound-player');
+                if (box.childElementCount > 0) {
+                    box.hidden = !box.hidden;
+                    return;
+                }
+                var iframe = document.createElement('iframe');
+                iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(btn.dataset.video)
+                    + '?start=' + encodeURIComponent(btn.dataset.start) + '&autoplay=1';
+                iframe.width = '320';
+                iframe.height = '180';
+                iframe.title = '타건음 샘플';
+                iframe.loading = 'lazy';
+                iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                box.appendChild(iframe);
+                box.hidden = false;
+            });
+        });
+    </script>
+</th:block>
