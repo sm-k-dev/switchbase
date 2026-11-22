@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('타건음 샘플 올리기')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>타건음 샘플 올리기</h1>
+    <p>유튜브 영상의 주소와 소리가 시작되는 시간을 적어 주세요. 음원 파일은 올리지 않아요.</p>
+
+    <form th:object="${form}" method="post" class="switch-form"
+          th:action="@{/switches/{id}/sounds(id=${switchId})}">
+        <p class="error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></p>
+
+        <label>유튜브 주소
+            <input type="url" th:field="*{youtube}" placeholder="https://youtu.be/영상id" required>
+        </label>
+        <p class="error" th:errors="*{youtube}"></p>
+
+        <label>시작 시간 (비우면 0초)
+            <input type="text" th:field="*{startTime}" placeholder="1:23 또는 83">
+        </label>
+        <p class="error" th:errors="*{startTime}"></p>
+
+        <label>채널 이름 (영상 올린 채널)
+            <input type="text" th:field="*{channelName}" maxlength="100" required>
+        </label>
+        <p class="error" th:errors="*{channelName}"></p>
+
+        <fieldset>
+            <legend>녹음 조건 (해당하는 것을 모두 고르세요)</legend>
+            <label th:each="c : ${conditionOptions}">
+                <input type="checkbox" th:field="*{conditions}" th:value="${c.name()}">
+                <span th:text="${c.label}">케이스 없음</span>
+            </label>
+        </fieldset>
+
+        <button type="submit">올리기</button>
+    </form>
+    <p><a th:href="@{/switches/{id}(id=${switchId})}">돌아가기</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
