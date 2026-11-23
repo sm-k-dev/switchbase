@@ -39,6 +39,14 @@ public class SoundService {
         return SoundView.groupByChannel(views);
     }
 
+    /** 신고 처리로 숨긴다(관리자). 이미 숨겨져 있어도 같은 상태가 된다. */
+    @Transactional
+    public void hideByReport(Long sampleId) {
+        SoundSample sample = samples.findById(sampleId).filter(s -> !s.isDeleted())
+                .orElseThrow(() -> new NoSuchElementException("샘플이 없습니다: " + sampleId));
+        sample.changeHidden(true);
+    }
+
     /**
      * 샘플을 등록한다. 주소와 시작 시간이 맞지 않으면 IllegalArgumentException,
      * 같은 영상과 시작 시간이 이미 있으면 SoundDuplicateException.

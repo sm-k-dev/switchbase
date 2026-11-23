@@ -2,7 +2,7 @@ package com.switchbase.reports;
 
 /** 신고 대상 종류 (Q9). */
 public enum ReportTargetType {
-    REVIEW("후기"), RATING("평가"), BUILD("빌드");
+    REVIEW("후기"), RATING("평가"), BUILD("빌드"), SOUND("타건음 샘플");
 
     private final String label;
 

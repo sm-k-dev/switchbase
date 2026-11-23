@@ -2,6 +2,7 @@ package com.switchbase.keyswitch;
 
 import com.switchbase.builds.BuildPart;
 import com.switchbase.member.MemberUserDetails;
+import com.switchbase.ratings.FilteredSummary;
 import com.switchbase.ratings.RatingService;
 import com.switchbase.ratings.RatingSummary;
 import com.switchbase.sounds.SoundService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +23,6 @@ import java.util.Objects;
 /** A vs B 비교 (sound-compare-design §5.3, §5.4). 누구나 볼 수 있고, 결과는 저장하지 않는다. */
 @Controller
 public class SwitchCompareController {
-
-    /** 필터 결과에서 평균을 보여 주는 최소 회원 수(Q6). */
-    static final int MIN_MEMBERS_FOR_AVERAGE = 3;
 
     private final SwitchService switchService;
     private final RatingService ratingService;
@@ -77,8 +76,13 @@ public class SwitchCompareController {
         model.addAttribute("bName", displayName(bSw));
         model.addAttribute("bSw", bSw);
         model.addAttribute("specRows", specRows(aSw, bSw));
-        model.addAttribute("aSummary", sideSummary(a, aSw, housingCode, lubedValue, filterApplied));
-        model.addAttribute("bSummary", sideSummary(b, bSw, housingCode, lubedValue, filterApplied));
+        SideSummary aSummary = sideSummary(a, aSw, housingCode, lubedValue, filterApplied);
+        SideSummary bSummary = sideSummary(b, bSw, housingCode, lubedValue, filterApplied);
+        model.addAttribute("aSummary", aSummary);
+        model.addAttribute("bSummary", bSummary);
+        model.addAttribute("aRadar", radarPoints(aSummary));
+        model.addAttribute("bRadar", radarPoints(bSummary));
+        model.addAttribute("radarFrame", radarPoints(5, 5, 5));
 
         List<SoundView.Group> aGroups = soundService.list(a, viewerId);
         List<SoundView.Group> bGroups = soundService.list(b, viewerId);
@@ -95,15 +99,43 @@ public class SwitchCompareController {
             return new SideSummary(displayName(sw), s.avgSound(), s.avgFatigue(), s.avgStar(),
                     orZero(s.sampleCount()), orZero(s.ratingCount()), false);
         }
-        RatingSummary s = ratingService.filteredSummary(id, housing, lubed);
-        long members = orZero(s.sampleCount());
-        boolean hidden = members < MIN_MEMBERS_FOR_AVERAGE;
-        return new SideSummary(displayName(sw),
-                hidden ? null : s.avgSound(), hidden ? null : s.avgFatigue(), hidden ? null : s.avgStar(),
-                members, orZero(s.ratingCount()), hidden);
+        FilteredSummary f = ratingService.filtered(id, housing, lubed == null ? null : lubed.toString());
+        return new SideSummary(displayName(sw), f.sound(), f.fatigue(), f.star(),
+                f.members(), f.ratings(), f.averagesHidden());
     }
 
     /** 같은 채널 샘플을 찾는다. 공통 채널이 없으면 빈 목록이고, 화면은 각자의 채널 목록을 보여 준다. */
+    /** 레이더 그림의 중심과 반지름(SVG viewBox 220 기준). */
+    static final double RADAR_CENTER = 110;
+    static final double RADAR_RADIUS = 90;
+
+    /** 평균이 세 축 모두 있을 때만 그린다. 없으면 null. */
+    static String radarPoints(SideSummary s) {
+        if (s.sound() == null || s.fatigue() == null || s.star() == null) {
+            return null;
+        }
+        return radarPoints(s.sound(), s.fatigue(), s.star());
+    }
+
+    /**
+     * 세 축(소리 크기 위, 피로도 오른쪽 아래, 별점 왼쪽 아래)의 값(0~5)을 SVG 점 목록으로 바꾼다.
+     * 값이 5면 바깥 테두리에 닿는다.
+     */
+    static String radarPoints(double sound, double fatigue, double star) {
+        double[] values = {sound, fatigue, star};
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            double angle = Math.toRadians(-90 + 120 * i);
+            double r = RADAR_RADIUS * Math.max(0, Math.min(5, values[i])) / 5.0;
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(String.format(Locale.ROOT, "%.1f,%.1f",
+                    RADAR_CENTER + r * Math.cos(angle), RADAR_CENTER + r * Math.sin(angle)));
+        }
+        return sb.toString();
+    }
+
     static List<SharedChannel> sharedChannels(List<SoundView.Group> aGroups, List<SoundView.Group> bGroups) {
         Map<String, SoundView.Group> byName = new LinkedHashMap<>();
         bGroups.forEach(g -> byName.put(g.channelName(), g));

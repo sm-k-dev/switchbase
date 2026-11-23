@@ -84,6 +84,23 @@
             </tr>
         </table>
 
+        <div class="radar" th:if="${aRadar != null and bRadar != null}">
+            <svg viewBox="0 0 220 220" width="260" role="img" aria-label="체감 평균 비교 그림">
+                <polygon th:attr="points=${radarFrame}" fill="none" stroke="currentColor" stroke-opacity="0.3"/>
+                <polygon th:attr="points=${aRadar}" fill="rgba(60,120,220,0.25)" stroke="rgb(60,120,220)"/>
+                <polygon th:attr="points=${bRadar}" fill="rgba(220,120,60,0.25)" stroke="rgb(220,120,60)"/>
+                <text x="110" y="12" text-anchor="middle" font-size="11">소리 크기</text>
+                <text x="200" y="168" text-anchor="start" font-size="11">피로도</text>
+                <text x="20" y="168" text-anchor="end" font-size="11">별점</text>
+            </svg>
+            <p class="muted">
+                <span style="color: rgb(60,120,220)">■</span> <span th:text="${aName}">A</span> ·
+                <span style="color: rgb(220,120,60)">■</span> <span th:text="${bName}">B</span>
+                (바깥쪽일수록 높음, 5점 만점)
+            </p>
+        </div>
+        <p class="muted" th:unless="${aRadar != null and bRadar != null}">평균이 세 항목 모두 있어야 그림을 그려요.</p>
+
         <h2>같은 채널의 샘플</h2>
         <p class="muted" th:if="${sharedChannels.isEmpty()}">같은 채널 샘플이 없어요. 각자의 샘플을 따로 보여 드려요.</p>
 

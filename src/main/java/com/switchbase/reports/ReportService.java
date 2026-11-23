@@ -3,6 +3,9 @@ package com.switchbase.reports;
 import com.switchbase.builds.BuildService;
 import com.switchbase.builds.KeyboardBuild;
 import com.switchbase.builds.KeyboardBuildRepository;
+import com.switchbase.sounds.SoundSample;
+import com.switchbase.sounds.SoundSampleRepository;
+import com.switchbase.sounds.SoundService;
 import com.switchbase.member.Member;
 import com.switchbase.member.MemberRepository;
 import com.switchbase.ratings.Rating;
@@ -36,10 +39,15 @@ public class ReportService {
     private final ReviewService reviewService;
     private final RatingService ratingService;
     private final BuildService buildService;
+    private final SoundSampleRepository soundSamples;
+    private final SoundService soundService;
 
     public ReportService(ReportRepository reports, MemberRepository members, ReviewRepository reviews,
                          RatingRepository ratings, KeyboardBuildRepository builds, ReviewService reviewService,
-                         RatingService ratingService, BuildService buildService) {
+                         RatingService ratingService, BuildService buildService,
+                         SoundSampleRepository soundSamples, SoundService soundService) {
+        this.soundSamples = soundSamples;
+        this.soundService = soundService;
         this.reports = reports;
         this.members = members;
         this.reviews = reviews;
@@ -68,7 +76,14 @@ public class ReportService {
                     .map(r -> new Target(r.getMember().getId(), r.getKeyboardSwitch().getId(), null, r.isHidden()));
             case BUILD -> builds.findById(id).filter(b -> b.getDeletedAt() == null)
                     .map(b -> new Target(b.getMember().getId(), null, b.getId(), b.isHidden()));
+            case SOUND -> soundSamples.findById(id).filter(s -> !s.isDeleted())
+                    .map(ReportService::soundTarget);
         };
+    }
+
+    private static Target soundTarget(SoundSample s) {
+        Long ownerId = s.getMember() == null ? null : s.getMember().getId();
+        return new Target(ownerId, s.getKeyboardSwitch().getId(), null, s.isHidden());
     }
 
     /** 접수. 본인 대상과 중복은 거부한다. 돌려주는 값은 대상 상세 링크(없으면 null). */
@@ -117,6 +132,7 @@ public class ReportService {
                 case REVIEW -> reviewService.hideByReport(report.getTargetId());
                 case RATING -> ratingService.hideByReport(report.getTargetId());
                 case BUILD -> buildService.setHidden(report.getTargetId(), true);
+                case SOUND -> soundService.hideByReport(report.getTargetId());
             }
         }
         report.resolve(admin, hide);

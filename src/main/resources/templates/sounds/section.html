@@ -17,6 +17,8 @@
                 <span class="muted" th:each="label : ${s.conditionLabels}" th:text="${label}">케이스 없음</span>
                 <span class="muted">· 올린 사람 <span th:text="${s.uploaderName}">닉네임</span></span>
                 <span th:if="${s.hidden}" class="error">숨김 처리된 샘플입니다 (작성자에게만 보여요)</span>
+                <a th:unless="${s.mine}" th:href="@{/reports/new(targetType='SOUND',targetId=${s.id})}"
+                   sec:authorize="isAuthenticated()">재생이 안 되면 신고 (메모에 적어 주세요)</a>
                 <div class="sound-player" hidden></div>
             </li>
         </ul>

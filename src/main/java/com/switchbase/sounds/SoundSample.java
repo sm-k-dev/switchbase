@@ -65,6 +65,10 @@ public class SoundSample {
         this.createdAt = Instant.now();
     }
 
+    void changeHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
     public Long getId() { return id; }
     public KeyboardSwitch getKeyboardSwitch() { return keyboardSwitch; }
     public Member getMember() { return member; }

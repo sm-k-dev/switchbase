@@ -25,6 +25,45 @@
         </tr>
     </table>
 
+    <form method="get" th:action="@{/switches/{id}(id=${switchId})}" class="switch-form filter-form">
+        <fieldset>
+            <legend>빌드 조건으로 좁혀 보기 (빌드를 붙인 평가만 세요)</legend>
+            <label>하우징
+                <select name="housing">
+                    <option value="">전체</option>
+                    <option th:each="c : ${housingOptions}" th:value="${c.code()}" th:text="${c.label()}"
+                            th:selected="${c.code() == housing}">플라스틱(ABS)</option>
+                </select>
+            </label>
+            <label>윤활
+                <select name="lubed">
+                    <option value="" th:selected="${lubed == ''}">전체</option>
+                    <option value="true" th:selected="${lubed == 'true'}">윤활함</option>
+                    <option value="false" th:selected="${lubed == 'false'}">윤활 안 함</option>
+                </select>
+            </label>
+        </fieldset>
+        <button type="submit">좁혀 보기</button>
+    </form>
+    <div th:if="${filterApplied}" class="filtered-result">
+        <p class="muted" th:text="|조건에 맞는 평가 ${filtered.members()}명 · ${filtered.ratings()}건|">조건 0명 · 0건</p>
+        <p class="muted" th:if="${filtered.averagesHidden()}">표본이 3명 미만이라 평균을 숨겼어요.</p>
+        <table class="spec-table" th:unless="${filtered.averagesHidden()}">
+            <tr>
+                <th>소리 크기</th>
+                <td th:text="${filtered.sound() != null} ? ${#numbers.formatDecimal(filtered.sound(), 1, 1)} : '-'">-</td>
+            </tr>
+            <tr>
+                <th>피로도</th>
+                <td th:text="${filtered.fatigue() != null} ? ${#numbers.formatDecimal(filtered.fatigue(), 1, 1)} : '-'">-</td>
+            </tr>
+            <tr>
+                <th>별점</th>
+                <td th:text="${filtered.star() != null} ? ${#numbers.formatDecimal(filtered.star(), 1, 1)} : '-'">-</td>
+            </tr>
+        </table>
+    </div>
+
     <p><a th:href="@{/switches/{id}/ratings/new(id=${switchId})}" sec:authorize="isAuthenticated()">평가 남기기</a></p>
 
     <ul class="ratings" th:unless="${ratingPage.empty}">

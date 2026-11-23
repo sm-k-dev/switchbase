@@ -134,6 +134,61 @@ class SoundRegistrationTest {
                 .andExpect(content().string(not(containsString("시작 1:23"))));
     }
 
+    @Test
+    void authorCannotReportOwnSample() throws Exception {
+        Long switchId = createSwitch();
+        MockHttpSession authorSession = login(verifiedMember());
+        postSample(authorSession, switchId, VIDEO, "1:23", "채널A");
+        Long sampleId = sampleId(switchId);
+
+        mvc.perform(post("/reports").session(authorSession).with(csrf())
+                        .param("targetType", "SOUND").param("targetId", sampleId.toString())
+                        .param("reasonCode", "WRONG_INFO"))
+                .andExpect(status().isOk());
+        assertThat(reportCount(sampleId)).isZero();
+    }
+
+    @Test
+    void reportedSampleIsHiddenByAdminAndDisappearsForVisitors() throws Exception {
+        Long switchId = createSwitch();
+        MockHttpSession authorSession = login(verifiedMember());
+        postSample(authorSession, switchId, VIDEO, "1:23", "채널A");
+        Long sampleId = sampleId(switchId);
+
+        mvc.perform(post("/reports").session(login(verifiedMember())).with(csrf())
+                        .param("targetType", "SOUND").param("targetId", sampleId.toString())
+                        .param("reasonCode", "WRONG_INFO").param("detail", "재생 안 됨"))
+                .andExpect(redirectedUrl("/switches/" + switchId));
+        assertThat(reportCount(sampleId)).isEqualTo(1);
+
+        Long reportId = jdbc.queryForObject(
+                "SELECT id FROM report WHERE target_type = 'SOUND' AND target_id = ?", Long.class, sampleId);
+        mvc.perform(post("/admin/reports/" + reportId + "/hide").session(adminSession()).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        mvc.perform(get("/switches/" + switchId))
+                .andExpect(content().string(not(containsString("시작 1:23"))));
+        mvc.perform(get("/switches/" + switchId).session(authorSession))
+                .andExpect(content().string(containsString("숨김 처리된 샘플입니다")));
+    }
+
+    private Long sampleId(Long switchId) {
+        return jdbc.queryForObject("SELECT id FROM sound_sample WHERE switch_id = ?", Long.class, switchId);
+    }
+
+    private int reportCount(Long sampleId) {
+        Integer n = jdbc.queryForObject(
+                "SELECT count(*) FROM report WHERE target_type = 'SOUND' AND target_id = ?", Integer.class, sampleId);
+        return n == null ? 0 : n;
+    }
+
+    private MockHttpSession adminSession() throws Exception {
+        MvcResult result = mvc.perform(post("/login").param("email", "admin@switchbase.local")
+                        .param("password", "AdminPassw0rd!").with(csrf()))
+                .andReturn();
+        return (MockHttpSession) result.getRequest().getSession(false);
+    }
+
     private org.springframework.test.web.servlet.ResultActions postSample(MockHttpSession session, Long switchId,
                                                                    String youtube, String start, String channel)
             throws Exception {

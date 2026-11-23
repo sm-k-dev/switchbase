@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.switchbase.member.MemberUserDetails;
+import com.switchbase.builds.BuildPart;
+import com.switchbase.ratings.FilteredSummary;
 import com.switchbase.ratings.RatingService;
 
 @Controller
@@ -59,6 +61,8 @@ public class SwitchController {
                   @RequestParam(value = "ratingPage", defaultValue = "0") int ratingPage,
                   @RequestParam(value = "sort", defaultValue = "recent") String sort,
                   @RequestParam(value = "reviewPage", defaultValue = "0") int reviewPage,
+                  @RequestParam(value = "housing", required = false) String housing,
+                  @RequestParam(value = "lubed", required = false) String lubed,
                   @AuthenticationPrincipal MemberUserDetails viewer, Model model) {
 
         model.addAttribute("sw", switchService.get(id));
@@ -77,6 +81,18 @@ public class SwitchController {
                 viewer == null ? null : viewer.getId(), viewer != null && viewer.isAdmin(),
                 PageRequest.of(Math.max(ratingPage, 0), RATING_PAGE_SIZE)));
         model.addAttribute("soundGroups", soundService.list(id, viewer == null ? null : viewer.getId()));
+
+        // 빌드 조건으로 체감 평균 좁혀 보기 (sound-compare-design §5.4)
+        String housingCode = FilteredSummary.housingOrNull(housing);
+        Boolean lubedValue = FilteredSummary.lubedOrNull(lubed);
+        boolean filterApplied = housingCode != null || lubedValue != null;
+        model.addAttribute("housingOptions", BuildPart.HOUSING.choices());
+        model.addAttribute("housing", housingCode == null ? "" : housingCode);
+        model.addAttribute("lubed", lubedValue == null ? "" : lubedValue.toString());
+        model.addAttribute("filterApplied", filterApplied);
+        model.addAttribute("filtered", filterApplied
+                ? ratingService.filtered(id, housingCode, lubedValue == null ? null : lubedValue.toString())
+                : null);
 
         return "switches/detail";
     }

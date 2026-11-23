@@ -100,6 +100,25 @@ class SwitchCompareTest {
                 .andExpect(content().string(containsString("비교")));
     }
 
+    @Test
+    void detailFilterShowsSmallSampleMessageWhenNoRatingsMatch() throws Exception {
+        Long a = createSwitch("DtlF " + hex());
+
+        mvc.perform(get("/switches/" + a).param("housing", "ABS"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("빌드 조건으로 좁혀 보기")))
+                .andExpect(content().string(containsString("표본이 3명 미만이라 평균을 숨겼어요")));
+    }
+
+    @Test
+    void detailIgnoresUnknownHousingCode() throws Exception {
+        Long a = createSwitch("DtlU " + hex());
+
+        mvc.perform(get("/switches/" + a).param("housing", "NOPE"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("표본이 3명 미만이라 평균을 숨겼어요"))));
+    }
+
     private void postSample(MockHttpSession session, Long switchId, String youtube, String start, String channel)
             throws Exception {
         mvc.perform(post("/switches/" + switchId + "/sounds").session(session).with(csrf())
