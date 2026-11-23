@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('스위치 비교')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>스위치 비교</h1>
+
+    <p><a th:href="@{/switches/{id}(id=${a})}" th:text="|← ${aName}|">스위치 A</a></p>
+
+    <form method="get" th:action="@{/switches/compare}" class="switch-form">
+        <input type="hidden" name="a" th:value="${a}">
+        <label>비교할 스위치 번호
+            <input type="number" name="b" min="1" th:value="${b}" required>
+        </label>
+
+        <fieldset>
+            <legend>빌드 조건으로 체감 평균 좁히기 (빌드를 붙인 평가만 세요)</legend>
+            <label>하우징
+                <select name="housing">
+                    <option value="">전체</option>
+                    <option th:each="c : ${housingOptions}" th:value="${c.code()}" th:text="${c.label()}"
+                            th:selected="${c.code() == housing}">플라스틱(ABS)</option>
+                </select>
+            </label>
+            <label>윤활
+                <select name="lubed">
+                    <option value="" th:selected="${lubed == ''}">전체</option>
+                    <option value="true" th:selected="${lubed == 'true'}">윤활함</option>
+                    <option value="false" th:selected="${lubed == 'false'}">윤활 안 함</option>
+                </select>
+            </label>
+        </fieldset>
+        <button type="submit">비교하기</button>
+    </form>
+
+    <th:block th:if="${bSw != null}">
+        <h2>스펙</h2>
+        <table class="spec-table compare-table">
+            <tr>
+                <th></th>
+                <th th:text="${aName}">A</th>
+                <th th:text="${bName}">B</th>
+            </tr>
+            <tr th:each="r : ${specRows}" th:classappend="${r.changed} ? 'changed'">
+                <th th:text="${r.label}">항목</th>
+                <td th:text="${r.fromValue}">-</td>
+                <td th:text="${r.toValue}">-</td>
+            </tr>
+        </table>
+
+        <h2>체감 평균</h2>
+        <p class="muted" th:if="${filterApplied}">빌드 조건을 적용한 결과예요. 표본이 3명 미만이면 평균을 숨겨요.</p>
+        <table class="spec-table compare-table">
+            <tr>
+                <th></th>
+                <th th:text="${aName}">A</th>
+                <th th:text="${bName}">B</th>
+            </tr>
+            <tr>
+                <th>표본</th>
+                <td th:text="|${aSummary.members()}명 · ${aSummary.ratings()}건|">0명 · 0건</td>
+                <td th:text="|${bSummary.members()}명 · ${bSummary.ratings()}건|">0명 · 0건</td>
+            </tr>
+            <tr th:if="${aSummary.averagesHidden() or bSummary.averagesHidden()}">
+                <th>안내</th>
+                <td th:text="${aSummary.averagesHidden()} ? '표본이 적어 평균을 숨겼어요' : '-'">-</td>
+                <td th:text="${bSummary.averagesHidden()} ? '표본이 적어 평균을 숨겼어요' : '-'">-</td>
+            </tr>
+            <tr>
+                <th>소리 크기</th>
+                <td th:text="${aSummary.sound() == null} ? '-' : ${#numbers.formatDecimal(aSummary.sound(), 1, 1)}">-</td>
+                <td th:text="${bSummary.sound() == null} ? '-' : ${#numbers.formatDecimal(bSummary.sound(), 1, 1)}">-</td>
+            </tr>
+            <tr>
+                <th>피로도</th>
+                <td th:text="${aSummary.fatigue() == null} ? '-' : ${#numbers.formatDecimal(aSummary.fatigue(), 1, 1)}">-</td>
+                <td th:text="${bSummary.fatigue() == null} ? '-' : ${#numbers.formatDecimal(bSummary.fatigue(), 1, 1)}">-</td>
+            </tr>
+            <tr>
+                <th>별점</th>
+                <td th:text="${aSummary.star() == null} ? '-' : ${#numbers.formatDecimal(aSummary.star(), 1, 1)}">-</td>
+                <td th:text="${bSummary.star() == null} ? '-' : ${#numbers.formatDecimal(bSummary.star(), 1, 1)}">-</td>
+            </tr>
+        </table>
+
+        <h2>같은 채널의 샘플</h2>
+        <p class="muted" th:if="${sharedChannels.isEmpty()}">같은 채널 샘플이 없어요. 각자의 샘플을 따로 보여 드려요.</p>
+
+        <section th:each="sc : ${sharedChannels}">
+            <h3 th:text="${sc.channelName}">채널</h3>
+            <div class="compare-samples">
+                <ul>
+                    <li th:each="s : ${sc.aSamples}">
+                        <span th:text="|시작 ${s.startLabel}|">시작 0:00</span>
+                        <span class="muted" th:each="label : ${s.conditionLabels}" th:text="${label}">케이스 없음</span>
+                    </li>
+                </ul>
+                <ul>
+                    <li th:each="s : ${sc.bSamples}">
+                        <span th:text="|시작 ${s.startLabel}|">시작 0:00</span>
+                        <span class="muted" th:each="label : ${s.conditionLabels}" th:text="${label}">케이스 없음</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <th:block th:if="${sharedChannels.isEmpty()}">
+            <section>
+                <h3 th:text="${aName}">A</h3>
+                <p class="muted" th:if="${aGroups.isEmpty()}">샘플이 없어요.</p>
+                <p class="muted" th:each="g : ${aGroups}" th:text="|${g.channelName} · ${g.samples.size()}개|">채널</p>
+            </section>
+            <section>
+                <h3 th:text="${bName}">B</h3>
+                <p class="muted" th:if="${bGroups.isEmpty()}">샘플이 없어요.</p>
+                <p class="muted" th:each="g : ${bGroups}" th:text="|${g.channelName} · ${g.samples.size()}개|">채널</p>
+            </section>
+        </th:block>
+    </th:block>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

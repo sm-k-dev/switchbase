@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('입문자 가이드')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <h1>입문자 가이드</h1>
+
+    <p class="notice">이 가이드는 초안이에요. 내용은 검토 후 바꿀 수 있어요.</p>
+
+    <p>처음이라면 아래 순서대로 보세요.</p>
+
+    <ol>
+        <li>스위치 목록에서 관심 있는 스위치를 찾아 <strong>스펙</strong>을 봅니다. 입력압과 키 깊이처럼 숫자로 된 항목부터 보면 됩니다.</li>
+        <li><strong>타건음 샘플</strong>을 들어 봅니다. 녹음 환경이 다르면 소리가 달라지니, 같은 채널의 샘플끼리 비교하세요.</li>
+        <li><strong>체감 평가</strong>의 평균을 봅니다. 평균 옆의 "N명"이 적으면 참고만 하세요.</li>
+        <li><strong>비교 화면</strong>에서 두 스위치를 나란히 보고, 빌드 조건(하우징, 윤활)으로 평균을 좁혀 볼 수 있습니다.</li>
+        <li>써 보았다면 체감 평가를 남겨 주세요. 평가는 다른 사람의 판단을 돕습니다.</li>
+    </ol>
+
+    <p>모르는 말이 나오면 <a th:href="@{/guide/terms}">감각 용어 사전</a>을 보세요.</p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

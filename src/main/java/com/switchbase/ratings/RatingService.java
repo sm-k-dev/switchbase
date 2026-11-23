@@ -65,6 +65,13 @@ public class RatingService {
         return stats.current(switchId);
     }
 
+    /** 빌드 조건으로 좁힌 요약. 실시간 조회라 표본 수가 적어도 값을 돌려준다(숨김 판단은 호출자가 한다). */
+    @Transactional(readOnly = true)
+    public RatingSummary filteredSummary(Long switchId, String housing, Boolean lubed) {
+        requireSwitch(switchId);
+        return ratings.summaryWithBuild(switchId, Retention.cutoff(Instant.now()), housing, lubed);
+    }
+
     public Page<RatingView> list(Long switchId, Long viewerId, boolean viewerAdmin, Pageable pageable) {
         requireSwitch(switchId);
         Long viewer = viewerId == null ? -1L : viewerId;
