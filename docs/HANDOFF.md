@@ -80,7 +80,7 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 - [x] CSV 가져오기 + 초기 스위치 데이터 (`data/switches.csv`)
 - [ ] 첫 배포 (AWS EC2 + RDS) — README에 배포 정보 커밋이 있으나 실제 배포 여부는 사용자 확인 필요
 
-### 2단계. 커뮤니티 열기 — 진행 중 (다음 작업 대상: 빌드 등록)
+### 2단계. 커뮤니티 열기 — 거의 완료 (남은 것: 개인정보 처리방침 결정 항목)
 - [x] **회원가입, 이메일 인증, 로그인 (Spring Security)** — 완료 (2026-11-08, 커밋 1b2deca·e1aed40·064ce99)
   - 회원(member) 기반 인증, ADMIN/USER, `switchbase.admin.*`로 첫 관리자 생성, 이메일 인증(개발 중엔 링크를 로그 출력), 실제 로그인 흐름 통합 테스트 42개 통과.
   - 이전 커밋 eb8c0c2의 메시지는 내용과 맞지 않았다(히스토리는 그대로 둠). 상세: `docs/work/member-design.md`, `docs/work/member-progress.md`.
@@ -123,22 +123,15 @@ claude.ai 프로젝트 채팅방의 「SwitchBase 기획서」와 「SwitchBase 
 - [x] 회원 탈퇴 (소프트 딜리트 30일 보관, 이메일·해시 즉시 삭제, 04:30 purge) — 구현 완료
 - [ ] 개인정보 처리방침 — 초안 작성 (`docs/work/privacy-policy-draft.md`). `[결정 필요]` 항목(운영자 정보, 문의 방법, SMTP 업체, 신고 기록 보관 기간, 처리 기한, 공지 방법)을 채우고 법률 검토 후 게시
 
-### 3단계. 소리와 비교
-- [x] 타건음 샘플 등록 (유튜브 URL + 시작 시간 + 녹음 조건) — 구현·테스트 완료 (2026-11-23, 사용자 PC `.\gradlew.bat test` BUILD SUCCESSFUL, 커밋 c580ac9)
-  - 구현: V11 마이그레이션(`sound_sample`, `sound_sample_condition`), `sounds` 패키지(등록 서비스, 유튜브 주소·시작 시간 파서, 폼, 컨트롤러), 등록 화면 `sounds/form.html`, 보안 규칙 2개.
-  - 확인: 사용자 PC에서 전체 테스트 통과. 주소·시작 시간 파서는 독립 실행으로도 검증(JDK 21). 커밋 메시지의 "테스트 미확인"은 이 기록으로 대체.
-  - 다음: 등록 통합 테스트(중복·권한·잘못된 주소) 추가. 샘플 목록 통합 테스트(숨김 노출·권한)도 추가 필요.
-  - 샘플 목록: 스위치 상세 하단(`sounds/section.html`). 채널별 묶음, 누를 때만 임베드, 숨김은 작성자에게만. 그룹핑·시간 표시 단위 테스트(`SoundViewTest`)는 독립 실행으로 확인. 재생 실패 신고는 신고 대상에 샘플이 없어 미구현.
-  - A vs B 비교 (`/switches/compare?a=&b=`, 화면 `switches/versus.html`): 스펙 나란히 보기, 같은 채널 샘플 나란히 보기, 빌드 조건(하우징·윤활) 필터로 체감 평균 좁히기. 표본 3명 미만이면 필터 결과 평균 숨김. 테스트 통과(2026-11-23, 사용자 PC, `7d3e358` 기준, `SwitchCompareTest` 5개).
-  - 입문자 가이드(`/guide`)와 감각 용어 사전(`/guide/terms`): 내용은 **초안**, 뜻 검토 필요. `GuideTest` 2개 통과.
-  - 구현·테스트 통과(2026-11-23, 사용자 PC `.\gradlew.bat test` BUILD SUCCESSFUL, 커밋 2dd85d1): 상세 화면 빌드 필터(평가 요약 아래), 비교 화면 레이더 차트(3축: 소리 크기·피로도·별점. 설계의 4축 중 소리 성향·타건감 비율은 요약 데이터에 없어서 뺌), 샘플 재생 실패 신고(신고 대상 SOUND 추가, V12 마이그레이션, 사유는 '잘못된 정보'와 메모로 처리).
-  - 미정: 용어 사전 뜻 검토(사람 확인 필요).
-  - 통합 테스트: 샘플 등록 권한·중복·잘못된 입력·숨김 노출(`SoundRegistrationTest` 7개 통과).
-  - 설계: `docs/work/sound-compare-design.md` (2026-11-20 확정)
-  - 설계 초안: `docs/work/sound-compare-design.md` (2026-11-20 확정, 사용자 결정 Q1~Q8 추천안 적용)
-- [ ] A vs B 비교 화면 (스펙, 체감 평균 레이더 차트, 같은 채널 샘플 우선)
-- [ ] 입문자 가이드 + 감각 용어 사전
-- [ ] 빌드 조건 필터로 체감 평균 좁혀 보기
+### 3단계. 소리와 비교 — 구현·테스트 완료 (사용자 PC BUILD SUCCESSFUL, 커밋 2dd85d1, 2026-11-23)
+- [x] 타건음 샘플 등록 (유튜브 주소 + 시작 시간 + 녹음 조건, V11) — `SoundRegistrationTest` 7개, `YoutubeRefTest` 22개
+- [x] 스위치 상세의 샘플 목록 (채널별 묶음, 누를 때만 임베드, 숨김은 작성자에게만) — `SoundViewTest` 3개
+- [x] A vs B 비교 `/switches/compare?a=&b=` (스펙 나란히, 체감 평균, 같은 채널 샘플, 레이더 3축) — `SwitchCompareTest` 5개, `SwitchCompareRadarTest` 3개
+- [x] 빌드 조건 필터(하우징·윤활): 상세 화면과 비교 화면. 표본 3명 미만이면 평균 숨김
+- [x] 샘플 재생 실패 신고 (신고 대상 SOUND, V12). 관리자가 숨기면 방문자에게서 사라지고 작성자에게만 보임
+- [x] 입문자 가이드 `/guide`, 감각 용어 사전 `/guide/terms` — 뜻은 쉬운 표현으로 정리한 초안. `GuideTest` 2개
+- 미구현·나중: 레이더 4축(소리 성향·타건감 비율은 집계 데이터 확장 필요), 용어마다 예시 샘플 붙이기
+- 설계: `docs/work/sound-compare-design.md` (2026-11-20 확정)
 
 ### 4단계. AI (1~3단계 데이터가 쌓인 뒤)
 우선순위: ① 후기 요약(배치·캐시) ② 자연어 검색(LLM → 필터 record → 기존 QueryDSL 재사용, LLM이 SQL을 만들지 않음)
